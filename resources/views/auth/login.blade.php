@@ -7,6 +7,7 @@
     <title>Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <style>
         body {
             background-color: #f3f4f6;
@@ -39,14 +40,6 @@
             max-width: 60%;
             margin-bottom: 20px;
         }
-        .login-left h3 {
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        .login-left p {
-            font-size: 1rem;
-            margin-top: 10px;
-        }
         .login-right {
             flex: 1;
             padding: 40px;
@@ -58,7 +51,7 @@
             position: relative;
             margin-bottom: 20px;
         }
-        .form-group input, .form-group select {
+        .form-group input {
             border: none;
             border-bottom: 2px solid #ddd;
             border-radius: 0;
@@ -66,7 +59,7 @@
             padding: 10px 35px 10px 10px;
             font-size: 1rem;
         }
-        .form-group input:focus, .form-group select:focus {
+        .form-group input:focus {
             border-bottom: 2px solid #dc3545;
             outline: none;
         }
@@ -112,9 +105,34 @@
                 padding: 30px;
             }
         }
+        .text-danger {
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        /* Updated Centered Loader */
+        .loader {
+            display: none; /* Ensures loader is hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader i {
+            font-size: 4rem;
+            color: #dc3545;
+        }
     </style>
 </head>
 <body>
+    <div class="loader" id="loader">
+        <i class="fas fa-spinner fa-spin"></i>
+    </div>
     <div class="login-container">
         <div class="login-left">
             <img src="{{ asset('images/unc-logo.png') }}" alt="University Logo">
@@ -123,34 +141,84 @@
             <div class="text-center mb-4">
                 <p class="welcome-text">Sign in to your account</p>
             </div>
-            <form action="{{ route('login') }}" method="POST">
+            <form id="loginForm" action="{{ route('login') }}" method="POST">
                 @csrf
-                <div class="form-group">
-                    <label for="role">Login As:</label>
-                    <select class="form-control" id="role" name="role">
-                        <option value="admin">Admin</option>
-                        <option value="student">Student</option>
-                        <option value="staff">Staff</option>
-                    </select>
-                    <i class="fas fa-user"></i>
-                </div>
+                <!-- Email Field -->
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
                     <i class="fas fa-envelope"></i>
+                    @error('email')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
+
+                <!-- Password Field -->
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-group">
                         <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
                         <i class="fas fa-lock"></i>
                     </div>
+                    @error('password')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
+
+                <!-- Remember Me -->
+                <div class="form-group form-check">
+                    <input type="checkbox" id="remember" name="remember" class="form-check-input">
+                    <label for="remember" class="form-check-label">Remember Me</label>
+                </div>
+
+                <!-- Submit Button -->
                 <div class="form-group text-center">
                     <button type="submit" class="btn btn-login btn-block">Sign In</button>
                 </div>
+
+                <!-- Error Message -->
+                @if (session('error'))
+                    <div class="text-danger text-center">{{ session('error') }}</div>
+                @endif
             </form>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Toastr Error Display
+            @if (session('error'))
+                toastr.error('{{ session('error') }}', 'Error', {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                });
+            @endif
+
+            // Toastr Success Display
+            @if (session('success'))
+                toastr.success('{{ session('success') }}', 'Success', {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: "toast-top-center",
+                });
+                setTimeout(() => {
+                    window.location.href = '{{ session('redirect') }}';
+                }, 2000);
+            @endif
+
+            // Show loader on form submission
+            $('#loginForm').submit(function (e) {
+                e.preventDefault(); // Prevent immediate form submission
+                $('#loader').css('display', 'flex'); // Dynamically apply flex for centering loader
+
+                // Simulate form submission delay (for testing purposes)
+                setTimeout(() => {
+                    this.submit(); // Submit the form after showing the loader
+                }, 500); // Adjust delay as needed
+            });
+        });
+    </script>
 </body>
 </html>

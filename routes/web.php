@@ -1,17 +1,19 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {return view('landing');});
-// Route for Dormitories List
-Route::get('/dormitories', function () {return view('dormitories');});
+// Landing Page
+Route::view('/', 'landing');
 
-// Route for Login Page
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('login');
+// Dormitories List
+Route::view('/dormitories', 'dormitories');
 
-Route::get('/admin/dashboard', function () {
-    return view('admin.dashboard');
-})->name('dashboard');
+// Login Page
+Route::view('/login', 'auth.login')->name('login');
 
+// Handle Login POST
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+// Admin Dashboard
+Route::view('/admin/dashboard', 'admin.dashboard')->name('dashboard');
