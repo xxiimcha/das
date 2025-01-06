@@ -82,12 +82,13 @@ class OwnerController extends Controller
     private function handleFileUploads(array $files, string $directory, string $dormName, string $prefix = '')
     {
         $uploadedFiles = [];
-        Storage::makeDirectory($directory);
 
         foreach ($files as $file) {
             $extension = $file->getClientOriginalExtension();
             $filename = $prefix . Str::slug($dormName) . '-' . uniqid() . '.' . $extension;
-            $path = $file->storeAs($directory, $filename);
+
+            // Use the specified directory (ensure it exists)
+            $path = $file->storeAs($directory, $filename, 'public');
             $uploadedFiles[] = $path;
         }
 

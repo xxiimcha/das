@@ -1,15 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const amenitiesContainer = document.getElementById('amenities-container'); // The container for amenity rows
-    const amenityTemplate = document.getElementById('amenity-template').content; // The template for new amenity rows
-    let currentIconInput = null;
+
+    const amenitiesContainer = document.getElementById('amenities-container');
+    const amenityTemplate = document.getElementById('amenity-template').content;
 
     // Add new amenity row
-    amenitiesContainer.addEventListener('click', function (event) {
-        if (event.target.closest('.add-amenity')) {
-            // Clone the template and append it to the container
-            const newAmenity = amenityTemplate.cloneNode(true);
-            amenitiesContainer.appendChild(newAmenity);
-        }
+    document.querySelector('.add-amenity').addEventListener('click', function () {
+        const newAmenity = amenityTemplate.cloneNode(true);
+        amenitiesContainer.appendChild(newAmenity);
     });
 
     // Remove existing amenity row
@@ -22,45 +19,39 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Handle "Select Icon" functionality
+    // Handle icon selection
     amenitiesContainer.addEventListener('click', function (event) {
         if (event.target.closest('.select-icon')) {
-            // Store the input field for the selected icon
-            currentIconInput = event.target.closest('.select-icon').nextElementSibling;
+            const selectIconButton = event.target.closest('.select-icon');
+            currentIconInput = selectIconButton.nextElementSibling;
 
-            // Open the icon picker modal
             const modal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
             modal.show();
         }
     });
 
-    // Assign the selected icon from the modal
     const iconGrid = document.querySelector('#iconGrid');
     iconGrid.addEventListener('click', function (event) {
         if (event.target.classList.contains('icon-item')) {
-            const icon = event.target.getAttribute('data-icon');
+            const selectedIcon = event.target.getAttribute('data-icon');
             if (currentIconInput) {
-                currentIconInput.value = icon;
+                currentIconInput.value = selectedIcon;
                 const iconButton = currentIconInput.previousElementSibling;
-                iconButton.innerHTML = `<i class="fa ${icon} text-primary"></i>`;
+                iconButton.innerHTML = `<i class="fa ${selectedIcon} text-primary"></i>`;
             }
 
-            // Close the modal
             const modal = bootstrap.Modal.getInstance(document.getElementById('iconPickerModal'));
             modal.hide();
         }
     });
-});
 
-document.addEventListener('DOMContentLoaded', function () {
+    // Load icons in modal
     const icons = [
         'fa-wifi', 'fa-tv', 'fa-parking', 'fa-swimming-pool', 'fa-bed', 'fa-coffee', 'fa-shower',
         'fa-car', 'fa-utensils', 'fa-lightbulb', 'fa-couch'
     ];
 
-    const iconGrid = document.querySelector('#iconGrid');
     const iconSearch = document.querySelector('#iconSearch');
-    let currentInput = null;
 
     function loadIcons(filter = '') {
         iconGrid.innerHTML = '';
@@ -72,28 +63,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    document.querySelectorAll('.select-icon').forEach(button => {
-        button.addEventListener('click', function () {
-            currentInput = this.nextElementSibling;
-            const modal = new bootstrap.Modal(document.getElementById('iconPickerModal'));
-            modal.show();
-            loadIcons();
-        });
-    });
-
-    iconGrid.addEventListener('click', function (e) {
-        if (e.target.classList.contains('icon-item')) {
-            const icon = e.target.getAttribute('data-icon');
-            currentInput.value = icon;
-            currentInput.previousElementSibling.innerHTML = `<i class="fa ${icon} fa-lg"></i>`;
-            const modal = bootstrap.Modal.getInstance(document.getElementById('iconPickerModal'));
-            modal.hide();
-        }
-    });
-
     iconSearch.addEventListener('input', function () {
-        const filter = this.value.toLowerCase();
-        loadIcons(filter);
+        loadIcons(this.value.toLowerCase());
     });
 
     loadIcons();

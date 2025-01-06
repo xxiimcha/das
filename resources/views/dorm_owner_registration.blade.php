@@ -68,7 +68,12 @@
                 </div>
 
                 <!-- Dynamic Fields for Inclusions/Amenities -->
-                <h3 class="text-primary">Inclusions/Amenities</h3>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="text-primary mb-0">Inclusions/Amenities</h3>
+                    <button type="button" class="btn btn-outline-success add-amenity shadow-sm">
+                        <i class="fa fa-plus-circle"></i>
+                    </button>
+                </div>
                 <hr>
                 <div id="amenities-container" class="mb-3">
                     <!-- First Amenity Input -->
@@ -76,7 +81,7 @@
                         <div class="col-md-1 text-center">
                             <!-- Placeholder for Selected Icon -->
                             <button type="button" class="btn btn-light select-icon shadow-sm">
-                                <i class="fa fa-plus-circle text-primary"></i>
+                                <i class="fa fa-wifi text-primary"></i>
                             </button>
                             <input type="hidden" name="amenity_icons[]" class="selected-icon">
                         </div>
@@ -84,8 +89,8 @@
                             <input type="text" name="amenities[]" class="form-control shadow-sm" placeholder="Enter an inclusion or amenity (e.g., Free Wi-Fi)" required>
                         </div>
                         <div class="col-md-2 text-center">
-                            <button type="button" class="btn btn-outline-success add-amenity shadow-sm">
-                                <i class="fa fa-plus-circle"></i>
+                            <button type="button" class="btn btn-outline-danger remove-amenity shadow-sm">
+                                <i class="fa fa-minus-circle"></i>
                             </button>
                         </div>
                     </div>
@@ -167,16 +172,7 @@
             </div>
             <div class="modal-body">
                 <input type="text" id="iconSearch" class="form-control mb-3" placeholder="Search icons...">
-                <div id="iconGrid" class="row g-3">
-                    <!-- Dynamically load icons here -->
-                    <div class="col-2 text-center">
-                        <i class="fa fa-wifi fa-2x icon-item" data-icon="fa-wifi"></i>
-                    </div>
-                    <div class="col-2 text-center">
-                        <i class="fa fa-tv fa-2x icon-item" data-icon="fa-tv"></i>
-                    </div>
-                    <!-- Add more icons -->
-                </div>
+                <div id="iconGrid" class="row g-3"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
