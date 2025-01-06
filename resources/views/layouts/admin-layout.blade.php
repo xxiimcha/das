@@ -130,37 +130,43 @@
                         <!-- Committee Specific Links -->
                         @if(auth()->user()->role === 'committee')
                             <li class="nav-item">
-                                <a href="{{ route('dormitories.index') }}" class="nav-link {{ request()->routeIs('dormitories.index') ? 'active' : '' }}">
+                                <a href="{{ route('committee.dashboard') }}" class="nav-link {{ request()->routeIs('committee.dashboard') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-speedometer2"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('committee.dormitories') }}" class="nav-link {{ request()->routeIs('committee.dormitories') ? 'active' : '' }}">
                                     <i class="nav-icon bi bi-house-door"></i>
                                     <p>Dormitories</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('criteria.index') }}" class="nav-link {{ request()->routeIs('criteria.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-gear"></i>
                                     <p>Set Criteria</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('inspection.index') }}" class="nav-link {{ request()->routeIs('inspection.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-calendar-check"></i>
                                     <p>Inspection</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('evaluation.index') }}" class="nav-link {{ request()->routeIs('evaluation.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-search"></i>
                                     <p>Evaluation</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('approval.index') }}" class="nav-link {{ request()->routeIs('approval.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-clipboard-check"></i>
                                     <p>Approval</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('monitoring.index') }}" class="nav-link {{ request()->routeIs('monitoring.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-eye"></i>
                                     <p>Monitoring</p>
                                 </a>
@@ -170,37 +176,37 @@
                         <!-- Owner Specific Links -->
                         @if(auth()->user()->role === 'owner')
                             <li class="nav-item">
-                                <a href="{{ route('account.index') }}" class="nav-link {{ request()->routeIs('account.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-person-circle"></i>
                                     <p>Your Account</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('security.index') }}" class="nav-link {{ request()->routeIs('security.index') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-shield-lock"></i>
                                     <p>Security</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('dormitory.edit') }}" class="nav-link {{ request()->routeIs('dormitory.edit') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-pencil"></i>
                                     <p>Edit Dormitory</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('inspection.details') }}" class="nav-link {{ request()->routeIs('inspection.details') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-clipboard"></i>
                                     <p>Inspection Details</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('evaluation.view') }}" class="nav-link {{ request()->routeIs('evaluation.view') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-search"></i>
                                     <p>View Evaluation</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('monitoring.details') }}" class="nav-link {{ request()->routeIs('monitoring.details') ? 'active' : '' }}">
+                                <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-eye"></i>
                                     <p>Monitoring Details</p>
                                 </a>
