@@ -6,6 +6,7 @@
 @section('breadcrumb-title', 'User Management')
 
 @section('content')
+
 <div class="card shadow card-danger card-outline">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title"><i class="fas fa-users"></i> User Management</h3>
@@ -14,6 +15,20 @@
         </button>
     </div>
     <div class="card-body">
+        <!-- Toastr Alerts -->
+        @if (session('success'))
+            <script>
+                toastr.success("{{ session('success') }}", "Success", { timeOut: 5000 });
+            </script>
+        @endif
+
+        @if (session('error'))
+            <script>
+                toastr.error("{{ session('error') }}", "Error", { timeOut: 5000 });
+            </script>
+        @endif
+
+        <!-- Filters and Table -->
         <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
             <input type="text" id="userSearch" class="form-control w-25" placeholder="Search users">
             <select id="filterRole" class="form-control w-25">
@@ -102,7 +117,7 @@
                             <label for="role" class="form-label">Role</label>
                             <select name="role" id="role" class="form-control">
                                 <option value="committee">Accreditation Committee</option>
-                                <option value="owner">Dormitory Owner</option>
+                                <option value="admin">System Administrator</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -133,27 +148,34 @@
 <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
+            <!-- Modal Header -->
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deleteUserModalLabel"><i class="fas fa-trash"></i> Confirm Deletion</h5>
+                <h5 class="modal-title" id="deleteUserModalLabel">
+                    <i class="fas fa-trash"></i> Confirm Deletion
+                </h5>
                 <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <!-- Modal Body -->
             <form id="deleteUserForm" method="POST">
                 @csrf
                 @method('DELETE')
                 <div class="modal-body">
                     <p>Are you sure you want to delete <strong id="deleteUserName"></strong>?</p>
                 </div>
+                <!-- Modal Footer -->
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Yes, Delete</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Yes, Delete
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-@endsection
 
-@section('scripts')
 <script>
     $(document).ready(function () {
         // Initialize DataTable

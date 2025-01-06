@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -14,8 +16,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Fetch all users from the database
-        $users = User::orderBy('created_at', 'desc')->get();
+        // Fetch all users except the currently logged-in user
+        $users = User::where('id', '!=', Auth::id())
+        ->orderBy('created_at', 'desc')
+        ->get();
+
         return view('admin.users', compact('users'));
     }
 
@@ -31,7 +36,7 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|string|in:accreditation committee,dorm owner',
+            'role' => 'required|string|in:committee,owner',
             'password' => 'required|string|min:6',
             'status' => 'required|string|in:active,inactive',
         ]);

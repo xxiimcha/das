@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>AdminLTE 4 | Dashboard</title>
+    <title>@yield('title', 'UNC DAS')</title> <!-- Default Title is 'UNC DAS' -->
     <!-- Primary Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="title" content="AdminLTE 4 | Dashboard" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" crossorigin="anonymous" />
@@ -15,6 +14,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous" />
     <!-- AdminLTE -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <style>
         /* Red and Gray Color Scheme */
         .bg-body {
@@ -48,7 +51,6 @@
             background-color: #dc3545;
             color: white;
         }
-
     </style>
 </head>
 <body class="layout-fixed sidebar-expand-lg bg-body">
@@ -77,7 +79,17 @@
                             <li class="user-header text-bg-primary">
                                 <p>{{ Auth::user()->name }}</p>
                                 <p>{{ Auth::user()->email }}</p>
-                                <p>{{ ucfirst(Auth::user()->role) }}</p>
+                                <p>
+                                    @if(Auth::user()->role === 'admin')
+                                        Administrator
+                                    @elseif(Auth::user()->role === 'committee')
+                                        Accreditation Committee
+                                    @elseif(Auth::user()->role === 'owner')
+                                        Dormitory Owner
+                                    @else
+                                        {{ ucfirst(Auth::user()->role) }}
+                                    @endif
+                                </p>
                             </li>
                             <li class="user-footer">
                                 <a href="#" class="btn btn-default btn-flat">Profile</a>
@@ -88,7 +100,7 @@
                 </ul>
             </div>
         </nav>
-        <!-- Sidebar -->
+
         <aside class="app-sidebar">
             <div class="sidebar-brand">
                 <a href="#" class="brand-link">
@@ -99,25 +111,106 @@
             <div class="sidebar-wrapper">
                 <nav class="mt-2">
                     <ul class="nav sidebar-menu flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                        <!-- Dashboard Link -->
-                        <li class="nav-item">
-                            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                                <i class="nav-icon bi bi-speedometer"></i>
-                                <p>Dashboard</p>
-                            </a>
-                        </li>
+                        <!-- Admin Specific Links -->
+                        @if(auth()->user()->role === 'admin')
+                            <li class="nav-item">
+                                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-speedometer"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-people-fill"></i>
+                                    <p>Users</p>
+                                </a>
+                            </li>
+                        @endif
 
-                        <!-- Users Link -->
-                        <li class="nav-item">
-                            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
-                                <i class="nav-icon bi bi-people-fill"></i>
-                                <p>Users</p>
-                            </a>
-                        </li>
+                        <!-- Committee Specific Links -->
+                        @if(auth()->user()->role === 'committee')
+                            <li class="nav-item">
+                                <a href="{{ route('dormitories.index') }}" class="nav-link {{ request()->routeIs('dormitories.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-house-door"></i>
+                                    <p>Dormitories</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('criteria.index') }}" class="nav-link {{ request()->routeIs('criteria.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-gear"></i>
+                                    <p>Set Criteria</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('inspection.index') }}" class="nav-link {{ request()->routeIs('inspection.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-calendar-check"></i>
+                                    <p>Inspection</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('evaluation.index') }}" class="nav-link {{ request()->routeIs('evaluation.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-search"></i>
+                                    <p>Evaluation</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('approval.index') }}" class="nav-link {{ request()->routeIs('approval.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-clipboard-check"></i>
+                                    <p>Approval</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('monitoring.index') }}" class="nav-link {{ request()->routeIs('monitoring.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-eye"></i>
+                                    <p>Monitoring</p>
+                                </a>
+                            </li>
+                        @endif
+
+                        <!-- Owner Specific Links -->
+                        @if(auth()->user()->role === 'owner')
+                            <li class="nav-item">
+                                <a href="{{ route('account.index') }}" class="nav-link {{ request()->routeIs('account.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-person-circle"></i>
+                                    <p>Your Account</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('security.index') }}" class="nav-link {{ request()->routeIs('security.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-shield-lock"></i>
+                                    <p>Security</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('dormitory.edit') }}" class="nav-link {{ request()->routeIs('dormitory.edit') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-pencil"></i>
+                                    <p>Edit Dormitory</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('inspection.details') }}" class="nav-link {{ request()->routeIs('inspection.details') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-clipboard"></i>
+                                    <p>Inspection Details</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('evaluation.view') }}" class="nav-link {{ request()->routeIs('evaluation.view') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-search"></i>
+                                    <p>View Evaluation</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('monitoring.details') }}" class="nav-link {{ request()->routeIs('monitoring.details') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-eye"></i>
+                                    <p>Monitoring Details</p>
+                                </a>
+                            </li>
+                        @endif
                     </ul>
                 </nav>
             </div>
         </aside>
+
         <!-- Main Content -->
         <main class="app-main">
             <div class="app-content-header">
