@@ -3,11 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OwnerController;
 // Landing Page (accessible without login)
 Route::view('/', 'landing');
 
 // Dormitories List (accessible without login)
 Route::view('/dormitories', 'dormitories');
+
+Route::get('/registration', function () {return view('dorm_owner_registration');})->name('register-dorm-owner');
+Route::post('/owner/register', [OwnerController::class, 'register'])->name('owner.register');
 
 // Login Page (accessible without login)
 Route::view('/login', 'auth.login')->name('login');

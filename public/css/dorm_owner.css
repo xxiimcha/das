@@ -1,0 +1,133 @@
+#fullPageLoader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loader-container {
+    text-align: center;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#thankYouMessage h2 {
+    font-size: 1.8rem;
+}
+
+#thankYouMessage p {
+    font-size: 1.2rem;
+}
+
+.select-icon i {
+    font-size: 1.8rem;
+}
+
+.amenity-row {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.amenity-row:last-child {
+    border-bottom: none;
+}
+
+.add-amenity i,
+.remove-amenity i {
+    font-size: 1.8rem;
+}
+
+.btn-light {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-outline-success,
+.btn-outline-danger {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-control {
+    border-radius: 10px;
+    box-shadow: none;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+h1, h3 {
+    font-family: 'Arial', sans-serif;
+}
+
+.form-label {
+    font-weight: bold;
+}
+
+#image-dropzone {
+    cursor: pointer;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+}
+
+#image-dropzone:hover {
+    background-color: #e9ecef;
+}
+
+#preview-container img {
+    max-height: 150px;
+    object-fit: cover;
+}
+
+.remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 10;
+    font-size: 16px;
+}
+
+#iconGrid .col-2 {
+    cursor: pointer;
+}
+
+#iconGrid .col-2:hover {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}

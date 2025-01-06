@@ -4,81 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>DAS - @yield('title', 'Admin Panel')</title>
+    <title>DAS - @yield('title', 'Dormitories')</title>
     <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
     <div class="wrapper">
-        <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="/" class="nav-link">Home</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#contact" class="nav-link">Contact</a>
-                </li>
-                <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#dormitories" class="nav-link">Dormitories</a>
-                </li>
-            </ul>
-        </nav>
+        <!-- Header Section -->
+        <div class="header-top bg-dark text-white py-2">
+            <div class="container d-flex justify-content-between align-items-center">
+                <div>Email: <span>example.edu.ph</span></div>
+                <div>
+                    Call: <span>09071568989</span> | <span>09651301775</span>
+                </div>
+            </div>
+        </div>
 
-        <!-- Sidebar -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="/" class="brand-link">
-                <span class="brand-text font-weight-light">DAS</span>
-            </a>
-            <div class="sidebar">
-                <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
+            <div class="container">
+                <a href="/" class="navbar-brand">
+                    <span class="brand-text font-weight-light">DAS</span>
+                </a>
+                <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+                    <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a href="{{ route('dashboard') }}" class="nav-link">
-                                <i class="nav-icon fas fa-tachometer-alt"></i>
-                                <p>Dashboard</p>
-                            </a>
+                            <a href="/" class="nav-link">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Users</p>
-                            </a>
+                            <a href="#contact" class="nav-link">Contact</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="nav-icon fas fa-cogs"></i>
-                                <p>Settings</p>
-                            </a>
+                            <a href="/dormitories" class="nav-link">Dormitories</a>
                         </li>
                     </ul>
-                </nav>
+                </div>
             </div>
-        </aside>
+        </nav>
 
         <!-- Content Wrapper -->
         <div class="content-wrapper">
-            <div class="content-header">
-                <div class="container-fluid">
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">@yield('page-title', 'Dashboard')</h1>
-                        </div>
-                        <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right">
-                                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                                <li class="breadcrumb-item active">@yield('breadcrumb-title', 'Dashboard')</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <section class="content">
                 <div class="container-fluid">
                     @yield('content')
@@ -93,8 +66,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
 </body>
 </html>

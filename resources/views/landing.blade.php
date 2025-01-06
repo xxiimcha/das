@@ -102,6 +102,7 @@
             <img src="{{ asset('images/dormitory-building.jpg') }}" alt="Dormitory Building" class="img-fluid">
             <div class="hero-overlay position-absolute d-flex flex-column justify-content-center align-items-center text-white">
                 <h1>Find the Best <span class="text-danger">Dormitory</span> for You</h1>
+                <button class="btn btn-danger mt-3" onclick="location.href='/registration';">List Your Dormitory</button>
             </div>
         </div>
 
@@ -176,8 +177,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('adminlte/plugins/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('adminlte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('adminlte/dist/js/adminlte.min.js') }}"></script>
 </body>
 </html>
