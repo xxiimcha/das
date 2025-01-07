@@ -7,6 +7,7 @@ use App\Http\Controllers\OwnerController;
 
 use App\Http\Controllers\CommitteeDormitoryController;
 use App\Http\Controllers\CommitteeDashboardController;
+use App\Http\Controllers\CommitteeCriteriaController;
 
 // Landing Page (accessible without login)
 Route::view('/', 'landing');
@@ -33,10 +34,20 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Committee Routes
+    // Dashboard Module
     Route::get('/committee/dashboard', [CommitteeDashboardController::class, 'index'])->name('committee.dashboard');
+
+    // Dormitories Module
     Route::get('/committee/dormitories', [CommitteeDormitoryController::class, 'index'])->name('committee.dormitories');
     Route::post('/committee/dormitories', [CommitteeDormitoryController::class, 'store'])->name('committee.dormitories.store');
     Route::delete('/committee/dormitories/{id}', [CommitteeDormitoryController::class, 'destroy'])->name('committee.dormitories.destroy');
+
+    // Criteria Module
+    Route::get('/committee/criteria', [CommitteeCriteriaController::class, 'index'])->name('criteria.index');
+    Route::post('/committee/criteria/column', [CommitteeCriteriaController::class, 'saveColumn'])->name('criteria.column.save');
+    Route::post('/committee/criteria/row', [CommitteeCriteriaController::class, 'saveRow'])->name('criteria.row.save');
+    Route::delete('/committee/criteria/row/{id}', [CommitteeCriteriaController::class, 'deleteRow'])->name('criteria.row.delete');
+
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

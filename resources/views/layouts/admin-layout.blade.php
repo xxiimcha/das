@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- AdminLTE -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
     <!-- Toastr CSS -->
@@ -142,7 +143,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('criteria.index') }}" class="nav-link {{ request()->routeIs('criteria.index') ? 'active' : '' }}">
                                     <i class="nav-icon bi bi-gear"></i>
                                     <p>Set Criteria</p>
                                 </a>
@@ -235,7 +236,7 @@
         <!-- Footer -->
         <footer class="app-footer">
             <strong>Copyright &copy; 2024&nbsp;
-                <a href="https://adminlte.io">AdminLTE.io</a>.
+                <a href="https://adminlte.io">UNC Dormitory Accreditation System</a>.
             </strong>
             All rights reserved.
         </footer>
