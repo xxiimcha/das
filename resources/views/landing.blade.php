@@ -82,7 +82,7 @@
                 </button>
 
                 <div class="collapse navbar-collapse order-3" id="navbarCollapse">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav ms-auto"> <!-- Add ms-auto for right alignment -->
                         <li class="nav-item">
                             <a href="/" class="nav-link">Home</a>
                         </li>
@@ -90,8 +90,32 @@
                             <a href="#contact" class="nav-link">Contact</a>
                         </li>
                         <li class="nav-item">
-                            <a href="#dormitories" class="nav-link">Dormitories</a>
+                            <a href="/view-dormitories" class="nav-link">Dormitories</a>
                         </li>
+
+                        @guest
+                            <!-- Show Login when user is not authenticated -->
+                            <li class="nav-item">
+                                <a href="/login" class="nav-link">Login</a>
+                            </li>
+                        @else
+                            <!-- Show User Dropdown when user is authenticated -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ Auth::user()->name }}
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                                    <li>
+                                        <form action="{{ route('logout') }}" method="POST" style="display: none;" id="logoutForm">
+                                            @csrf
+                                        </form>
+                                        <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endguest
                     </ul>
                 </div>
             </div>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>DAS - @yield('title', 'Dormitories')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- AdminLTE CSS -->
     <link rel="stylesheet" href="{{ asset('adminlte/dist/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -35,7 +36,7 @@
                 </button>
 
                 <div class="collapse navbar-collapse order-3" id="navbarCollapse">
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav ms-auto"> <!-- Add ms-auto for right alignment -->
                         <li class="nav-item">
                             <a href="/" class="nav-link">Home</a>
                         </li>
@@ -43,8 +44,35 @@
                             <a href="#contact" class="nav-link">Contact</a>
                         </li>
                         <li class="nav-item">
-                            <a href="/dormitories" class="nav-link">Dormitories</a>
+                            <a href="/view-dormitories" class="nav-link">Dormitories</a>
                         </li>
+
+                        @guest
+                            <!-- Show Login when user is not authenticated -->
+                            <li class="nav-item">
+                                <a href="/login" class="nav-link">Login</a>
+                            </li>
+                        @else
+                            <!-- Show User Dropdown when user is authenticated -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ Auth::user()->name }}
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#"
+                                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
+                                            Logout
+                                        </a>
+                                        <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                            @csrf
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endguest
                     </ul>
                 </div>
             </div>

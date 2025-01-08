@@ -1,165 +1,42 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <style>
-        body {
-            background-color: #f3f4f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Arial', sans-serif;
-        }
-        .login-container {
-            width: 100%;
-            max-width: 900px;
-            background-color: white;
-            border-radius: 16px;
-            display: flex;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        .login-left {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-            background-color: white;
-        }
-        .login-left img {
-            max-width: 60%;
-            margin-bottom: 20px;
-        }
-        .login-right {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .form-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .form-group input {
-            border: none;
-            border-bottom: 2px solid #ddd;
-            border-radius: 0;
-            width: 100%;
-            padding: 10px 35px 10px 10px;
-            font-size: 1rem;
-        }
-        .form-group input:focus {
-            border-bottom: 2px solid #dc3545;
-            outline: none;
-        }
-        .form-group i {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-        }
-        .btn-login {
-            background-color: #dc3545;
-            color: white;
-            font-size: 1rem;
-            border-radius: 5px;
-            padding: 12px;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-        .btn-login:hover {
-            background-color: #b71c1c;
-            transform: translateY(-2px);
-        }
-        .welcome-text {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #495057;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-            }
-            .login-left, .login-right {
-                flex: none;
-                width: 100%;
-            }
-            .login-left {
-                text-align: center;
-                padding: 20px;
-            }
-            .login-right {
-                padding: 30px;
-            }
-        }
-        .text-danger {
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        /* Updated Centered Loader */
-        .loader {
-            display: none; /* Ensures loader is hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
+@extends('layouts.app')
 
-        .loader i {
-            font-size: 4rem;
-            color: #dc3545;
-        }
-    </style>
-</head>
-<body>
-    <div class="loader" id="loader">
-        <i class="fas fa-spinner fa-spin"></i>
-    </div>
+@section('title', 'Login')
+
+@section('content')
+<div class="loader" id="loader">
+    <i class="fas fa-spinner fa-spin"></i>
+</div>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="login-container">
+        <!-- Left Section with Logo -->
         <div class="login-left">
-            <img src="{{ asset('images/unc-logo.png') }}" alt="University Logo">
+            <img src="{{ asset('images/unc-logo.png') }}" alt="University Logo" class="img-fluid">
         </div>
+
+        <!-- Right Section with Form -->
         <div class="login-right">
             <div class="text-center mb-4">
-                <p class="welcome-text">Sign in to your account</p>
+                <p class="welcome-text text-danger">Sign in to your account</p>
             </div>
             <form id="loginForm" action="{{ route('login') }}" method="POST">
                 @csrf
+
                 <!-- Email Field -->
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
-                    <i class="fas fa-envelope"></i>
+                <div class="form-group position-relative">
+                    <input type="email" id="email" name="email" class="form-control" required>
+                    <label for="email" class="floating-label">Email</label>
+                    <i class="fas fa-envelope input-icon"></i>
                     @error('email')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <!-- Password Field -->
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required>
-                        <i class="fas fa-lock"></i>
-                    </div>
+                <div class="form-group position-relative">
+                    <input type="password" id="password" name="password" class="form-control" required>
+                    <label for="password" class="floating-label">Password</label>
+                    <i class="fas fa-lock input-icon"></i>
                     @error('password')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
@@ -171,9 +48,16 @@
                     <label for="remember" class="form-check-label">Remember Me</label>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Sign In Button -->
                 <div class="form-group text-center">
                     <button type="submit" class="btn btn-login btn-block">Sign In</button>
+                </div>
+
+                <!-- Create Account Link -->
+                <div class="text-center mt-3">
+                    <p class="small">
+                        Don't have an account? <a href="{{ route('auth.register.form') }}" class="text-danger no-underline">Create Account</a>
+                    </p>
                 </div>
 
                 <!-- Error Message -->
@@ -183,42 +67,163 @@
             </form>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            // Toastr Error Display
-            @if (session('error'))
-                toastr.error('{{ session('error') }}', 'Error', {
-                    closeButton: true,
-                    progressBar: true,
-                    positionClass: "toast-top-center",
-                });
-            @endif
+</div>
 
-            // Toastr Success Display
-            @if (session('success'))
-                toastr.success('{{ session('success') }}', 'Success', {
-                    closeButton: true,
-                    progressBar: true,
-                    positionClass: "toast-top-center",
-                });
-                setTimeout(() => {
-                    window.location.href = '{{ session('redirect') }}';
-                }, 2000);
-            @endif
+<style>
+    .loader {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
 
-            // Show loader on form submission
-            $('#loginForm').submit(function (e) {
-                e.preventDefault(); // Prevent immediate form submission
-                $('#loader').css('display', 'flex'); // Dynamically apply flex for centering loader
+    .loader i {
+        font-size: 4rem;
+        color: #dc3545;
+    }
 
-                // Simulate form submission delay (for testing purposes)
-                setTimeout(() => {
-                    this.submit(); // Submit the form after showing the loader
-                }, 500); // Adjust delay as needed
-            });
+    .login-container {
+        width: 100%;
+        max-width: 900px;
+        background-color: white;
+        border-radius: 16px;
+        display: flex;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .login-left {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+        background-color: #f8f9fa;
+    }
+
+    .login-left img {
+        max-width: 70%;
+        margin-bottom: 0;
+    }
+
+    .login-right {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .form-control {
+        border: none;
+        border-bottom: 2px solid #ddd;
+        border-radius: 0;
+        font-size: 1rem;
+        width: 100%;
+        padding: 10px 10px 10px 0;
+        background-color: transparent;
+    }
+
+    .form-control:focus {
+        border-bottom: 2px solid #dc3545;
+        outline: none;
+    }
+
+    .floating-label {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        color: #6c757d;
+        transition: all 0.2s ease-in-out;
+        pointer-events: none;
+    }
+
+    .form-control:focus + .floating-label,
+    .form-control:not(:placeholder-shown) + .floating-label {
+        top: -10px;
+        font-size: 0.85rem;
+        color: #dc3545;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+    }
+
+    .btn-login {
+        background-color: #dc3545;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        width: 100%;
+    }
+
+    .btn-login:hover {
+        background-color: #b71c1c;
+        transform: translateY(-2px);
+    }
+
+    .welcome-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 20px;
+    }
+
+    .no-underline {
+        text-decoration: none !important;
+    }
+
+    @media (max-width: 768px) {
+        .login-container {
+            flex-direction: column;
+        }
+
+        .login-left, .login-right {
+            flex: none;
+            width: 100%;
+        }
+
+        .login-left {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .login-right {
+            padding: 30px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('loginForm');
+        const loader = document.getElementById('loader');
+
+        form.addEventListener('submit', function () {
+            loader.style.display = 'flex';
         });
-    </script>
-</body>
-</html>
+    });
+</script>
+@endsection

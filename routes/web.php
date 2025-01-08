@@ -17,15 +17,18 @@ use App\Http\Controllers\Owner\EvaluationController;
 Route::view('/', 'landing');
 
 // Dormitories List (accessible without login)
-Route::view('/dormitories', 'dormitories');
+Route::view('/view-dormitories', 'dormitories');
 
 // Registration for Dormitory Owner
 Route::get('/registration', function () {return view('dorm_owner_registration');})->name('register-dorm-owner');
 Route::post('/owner/register', [OwnerRegistrationController::class, 'store'])->name('owner.register');
 
+// User Registration
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('auth.register.form');
+Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+
 // Login Page (accessible without login)
 Route::view('/login', 'auth.login')->name('login');
-
 // Handle Login POST
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
