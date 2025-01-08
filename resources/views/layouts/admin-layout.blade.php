@@ -176,43 +176,44 @@
 
                         <!-- Owner Specific Links -->
                         @if(auth()->user()->role === 'owner')
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-person-circle"></i>
-                                    <p>Your Account</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-shield-lock"></i>
-                                    <p>Security</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-pencil"></i>
-                                    <p>Edit Dormitory</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-clipboard"></i>
-                                    <p>Inspection Details</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-search"></i>
-                                    <p>View Evaluation</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-eye"></i>
-                                    <p>Monitoring Details</p>
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.dashboard') }}" class="nav-link {{ request()->routeIs('owner.dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-person-circle"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.security') }}" class="nav-link {{ request()->routeIs('owner.security') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-shield-lock"></i>
+                                <p>Security</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('dormitories.index') }}" class="nav-link {{ request()->routeIs('owner.edit.dormitory') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-pencil"></i>
+                                <p>Dormitories</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.inspection') }}" class="nav-link {{ request()->routeIs('owner.inspection') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-clipboard"></i>
+                                <p>Inspection Details</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.evaluation') }}" class="nav-link {{ request()->routeIs('owner.evaluation') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-search"></i>
+                                <p>View Evaluation</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('owner.monitoring') }}" class="nav-link {{ request()->routeIs('owner.monitoring') ? 'active' : '' }}">
+                                <i class="nav-icon bi bi-eye"></i>
+                                <p>Monitoring Details</p>
+                            </a>
+                        </li>
                         @endif
+
                     </ul>
                 </nav>
             </div>

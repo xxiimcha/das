@@ -40,6 +40,10 @@ class AuthController extends Controller
                         'success' => 'Welcome to the Committee Dashboard!',
                     ]);
 
+                case 'owner':
+                    return redirect()->route('owner.dashboard')->with([
+                        'success' => 'Welcome to the Owner Dashboard!',
+                    ]);
 
                 default:
                     // If role is undefined or not handled, redirect to a default page

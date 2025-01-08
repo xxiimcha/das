@@ -9,6 +9,8 @@ use App\Http\Controllers\CommitteeDormitoryController;
 use App\Http\Controllers\CommitteeDashboardController;
 use App\Http\Controllers\CommitteeCriteriaController;
 
+use App\Http\Controllers\Owner\DormitoryController;
+
 // Landing Page (accessible without login)
 Route::view('/', 'landing');
 
@@ -48,6 +50,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/committee/criteria/row', [CommitteeCriteriaController::class, 'saveRow'])->name('criteria.row.save');
     Route::delete('/committee/criteria/row/{id}', [CommitteeCriteriaController::class, 'deleteRow'])->name('criteria.row.delete');
 
+    // Owner
+    // Links
+    Route::view('/dashboard', 'owner.dashboard')->name('owner.dashboard');
+    Route::view('/inspection', 'owner.dashboard')->name('owner.inspection');
+    Route::view('/account', 'owner.account')->name('owner.account');
+    Route::view('/security', 'owner.security')->name('owner.security');
+    Route::view('/evaluation', 'owner.evaluation')->name('owner.evaluation');
+    Route::view('/monitoring', 'owner.monitoring')->name('owner.monitoring');
+
+    // Dormitory Module
+    Route::get('dormitories', [DormitoryController::class, 'index'])->name('dormitories.index');
+    Route::get('dormitories/{id}/edit', [DormitoryController::class, 'edit'])->name('dormitories.edit');
+    Route::delete('dormitories/{id}', [DormitoryController::class, 'destroy'])->name('dormitories.destroy');
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
