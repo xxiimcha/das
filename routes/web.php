@@ -11,6 +11,7 @@ use App\Http\Controllers\CommitteeDashboardController;
 use App\Http\Controllers\CommitteeCriteriaController;
 
 use App\Http\Controllers\Owner\DormitoryController;
+use App\Http\Controllers\Owner\EvaluationController;
 
 // Landing Page (accessible without login)
 Route::view('/', 'landing');
@@ -62,12 +63,15 @@ Route::middleware('auth')->group(function () {
     Route::view('/inspection', 'owner.dashboard')->name('owner.inspection');
     Route::view('/account', 'owner.account')->name('owner.account');
     Route::view('/security', 'owner.security')->name('owner.security');
-    Route::view('/evaluation', 'owner.evaluation')->name('owner.evaluation');
     Route::view('/monitoring', 'owner.monitoring')->name('owner.monitoring');
 
     // Dormitory Module
     Route::get('dormitories', [DormitoryController::class, 'index'])->name('dormitories.index');
     Route::get('dormitories/{id}', [DormitoryController::class, 'show'])->name('dormitories.show');
+
+    // Evaluation Module
+    Route::get('/evaluation', [EvaluationController::class, 'index'])->name('evaluation.index');
+    Route::get('/evaluation/{id}', [EvaluationController::class, 'show'])->name('evaluation.show');
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

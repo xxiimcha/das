@@ -198,7 +198,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('owner.evaluation') }}" class="nav-link {{ request()->routeIs('owner.evaluation') ? 'active' : '' }}">
+                            <a href="{{ route('evaluation.index') }}" class="nav-link {{ request()->routeIs('evaluation.index') ? 'active' : '' }}">
                                 <i class="nav-icon bi bi-search"></i>
                                 <p>View Evaluation</p>
                             </a>
