@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -19,11 +20,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
-        'otp',
-        'otp_expires_at',
-        'forgot_password_token',
-        'status',
+        'role',                   // User role, e.g., 'owner', 'admin', 'tenant'
+        'otp',                    // One-time password for verification
+        'otp_expires_at',         // Expiry time for OTP
+        'forgot_password_token',  // Token for resetting password
+        'status',                 // User status, e.g., 'active', 'inactive', 'pending'
     ];
 
     /**
@@ -34,6 +35,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'otp',
+        'forgot_password_token',
     ];
 
     /**
@@ -43,7 +46,56 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'otp_expires_at' => 'datetime', // Cast `otp_expires_at` to a DateTime
-        'status' => 'string',           // Optional, but keeps it explicit
+        'otp_expires_at' => 'datetime',
+        'status' => 'string',
     ];
+
+    /**
+     * Hash the password before saving it to the database.
+     *
+     * @param string $value
+     * @return void
+     */
+    public function setPasswordAttribute($value)
+    {
+        $this->attributes['password'] = Hash::make($value);
+    }
+
+    /**
+     * Relationship: User owns multiple dormitories.
+     */
+    public function dormitories()
+    {
+        return $this->hasMany(Dormitory::class);
+    }
+
+    /**
+     * Check if the user is an owner.
+     *
+     * @return bool
+     */
+    public function isOwner()
+    {
+        return $this->role === 'owner';
+    }
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the user is active.
+     *
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
 }

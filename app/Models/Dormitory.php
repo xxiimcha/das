@@ -10,26 +10,32 @@ class Dormitory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'owner_id',
+        'user_id', // Changed to user_id to match the migration
         'name',
         'location',
         'price_range',
         'capacity',
         'description',
-        'amenities',
-        'images',
-        'permits',
-        'status',
-    ];
-
-    protected $casts = [
-        'amenities' => 'array',
-        'images' => 'array',
-        'permits' => 'array',
+        'status', // Optional field for approval status
     ];
 
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function amenities()
+    {
+        return $this->hasMany(Amenity::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(DormitoryImage::class);
+    }
+
+    public function documents()
+    {
+        return $this->hasMany(DormitoryDocument::class);
     }
 }

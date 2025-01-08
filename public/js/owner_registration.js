@@ -140,16 +140,40 @@ document.addEventListener('DOMContentLoaded', function () {
     const submitBtn = document.querySelector('#submitBtn');
 
     form.addEventListener('submit', function (e) {
-        e.preventDefault(); // Prevent form default submission
-
-        // Show loader (form remains visible)
+        e.preventDefault();
         loader.classList.remove('d-none');
 
-        // Simulate form submission (replace this with an actual AJAX call if needed)
-        setTimeout(() => {
-            loader.classList.add('d-none'); // Hide loader
-            form.classList.add('d-none'); // Hide form after loader finishes
-            thankYouMessage.classList.remove('d-none'); // Show thank-you message
-        }, 3000); // Simulate 3 seconds loading time
+        const formData = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw response.json(); // Handle errors
+            }
+            return response.json();
+        })
+        .then(data => {
+            loader.classList.add('d-none');
+            if (data.success) {
+                form.classList.add('d-none');
+                thankYouMessage.classList.remove('d-none');
+            } else {
+                alert(data.message || 'An error occurred.');
+            }
+        })
+        .catch(async (errorResponse) => {
+            loader.classList.add('d-none');
+            const errors = await errorResponse;
+            if (errors.errors) {
+                const errorMessages = Object.values(errors.errors)
+                    .map(messages => messages.join(', '))
+                    .join('\n');
+                alert(`Validation Errors:\n${errorMessages}`);
+            } else {
+                alert('An error occurred. Please try again.');
+            }
+        });
     });
 });
