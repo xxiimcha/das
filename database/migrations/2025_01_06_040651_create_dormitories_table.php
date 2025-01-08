@@ -16,6 +16,7 @@ class CreateDormitoriesTable extends Migration
             $table->string('price_range');
             $table->integer('capacity');
             $table->text('description');
+            $table->string('status');
             $table->timestamps();
         });
     }

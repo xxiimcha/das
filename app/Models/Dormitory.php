@@ -16,7 +16,7 @@ class Dormitory extends Model
         'price_range',
         'capacity',
         'description',
-        'status', // Optional field for approval status
+        'status',
     ];
 
     public function owner()

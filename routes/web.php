@@ -61,8 +61,7 @@ Route::middleware('auth')->group(function () {
 
     // Dormitory Module
     Route::get('dormitories', [DormitoryController::class, 'index'])->name('dormitories.index');
-    Route::get('dormitories/{id}/edit', [DormitoryController::class, 'edit'])->name('dormitories.edit');
-    Route::delete('dormitories/{id}', [DormitoryController::class, 'destroy'])->name('dormitories.destroy');
+    Route::get('dormitories/{id}', [DormitoryController::class, 'show'])->name('dormitories.show');
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
