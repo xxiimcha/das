@@ -9,6 +9,8 @@ class Amenity extends Model
 {
     use HasFactory;
 
+    protected $table = 'dormitory_amenities'; // Updated table name
+
     protected $fillable = [
         'dormitory_id',
         'name',

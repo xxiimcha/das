@@ -11,9 +11,12 @@ use App\Models\Dormitory;
 use App\Models\Amenity;
 use App\Models\DormitoryImage;
 use App\Models\DormitoryDocument;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OwnerRegistrationMail;
 
 class OwnerRegistrationController extends Controller
 {
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -34,10 +37,11 @@ class OwnerRegistrationController extends Controller
         try {
             DB::beginTransaction();
 
+            $password = 'password123'; // Or generate a random password
             $user = User::create([
                 'name' => $validated['owner_name'],
                 'email' => $validated['owner_email'],
-                'password' => Hash::make('password123'),
+                'password' => Hash::make($password),
                 'role' => 'owner',
             ]);
 
@@ -79,6 +83,15 @@ class OwnerRegistrationController extends Controller
             }
 
             DB::commit();
+
+            // Send Email
+            $details = [
+                'name' => $validated['owner_name'],
+                'email' => $validated['owner_email'],
+                'password' => $password,
+            ];
+
+            Mail::to($validated['owner_email'])->send(new OwnerRegistrationMail($details));
 
             return response()->json(['success' => true, 'message' => 'Registration successful!']);
         } catch (\Exception $e) {

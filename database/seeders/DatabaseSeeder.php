@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CriteriaColumnSeeder::class,
             CriteriaSeeder::class,
+            AdminSeeder::class,
         ]);
 
         User::factory()->create([
