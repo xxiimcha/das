@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OwnerRegistrationController;
+use App\Http\Controllers\ProfileController;
 
 use App\Http\Controllers\CommitteeDormitoryController;
 use App\Http\Controllers\CommitteeDashboardController;
@@ -29,6 +30,11 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 // Admin Functionality (requires login)
 Route::middleware('auth')->group(function () {
+    // Profule Route
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
     // Admin Routes
     Route::view('/admin/dashboard', 'admin.dashboard')->name('dashboard');
     Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');

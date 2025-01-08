@@ -6,6 +6,7 @@
     <!-- Primary Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
     <!-- Fonts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" crossorigin="anonymous" />
     <!-- Third Party Plugins -->
@@ -19,6 +20,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"/>
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
     <style>
         /* Red and Gray Color Scheme */
         .bg-body {
@@ -93,7 +96,7 @@
                                 </p>
                             </li>
                             <li class="user-footer">
-                                <a href="#" class="btn btn-default btn-flat">Profile</a>
+                                <a href="{{ route('profile.index') }}" class="btn btn-default btn-flat">Profile</a>
                                 <a href="{{ route('logout') }}" class="btn btn-default btn-flat float-end">Sign out</a>
                             </li>
                         </ul>
@@ -180,12 +183,6 @@
                             <a href="{{ route('owner.dashboard') }}" class="nav-link {{ request()->routeIs('owner.dashboard') ? 'active' : '' }}">
                                 <i class="nav-icon bi bi-person-circle"></i>
                                 <p>Dashboard</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('owner.security') }}" class="nav-link {{ request()->routeIs('owner.security') ? 'active' : '' }}">
-                                <i class="nav-icon bi bi-shield-lock"></i>
-                                <p>Security</p>
                             </a>
                         </li>
                         <li class="nav-item">
