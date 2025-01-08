@@ -41,7 +41,7 @@ class OwnerRegistrationController extends Controller
             $user = User::create([
                 'name' => $validated['owner_name'],
                 'email' => $validated['owner_email'],
-                'password' => Hash::make($password),
+                'password' => Hash::make($password), // Password is hashed using Hash::make()
                 'role' => 'owner',
             ]);
 

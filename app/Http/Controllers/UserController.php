@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -47,7 +47,7 @@ class UserController extends Controller
             'email' => $validatedData['email'],
             'role' => $validatedData['role'],
             'status' => $validatedData['status'],
-            'password' => bcrypt($validatedData['password']),
+            'password' => Hash::make($validatedData['password']),
         ]);
 
         // Redirect back to the user index with a success message

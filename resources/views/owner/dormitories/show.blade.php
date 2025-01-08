@@ -40,13 +40,15 @@
             </div>
         </div>
 
-        <!-- Images Section -->
+        <!-- Images Section (Gallery) -->
         <h4 class="text-danger border-bottom pb-2 mb-4">Images</h4>
-        <div class="row">
+        <div class="row g-3 mb-4">
             @forelse($dormitory->images as $image)
-                <div class="col-md-3 mb-4">
-                    <div class="card shadow-sm">
-                        <img src="{{ asset('storage/' . $image->image_path) }}" class="card-img-top img-fluid" alt="Dormitory Image">
+                <div class="col-md-4 col-sm-6">
+                    <div class="card border-0 shadow-sm">
+                        <a href="{{ asset('storage/' . $image->image_path) }}" target="_blank">
+                            <img src="{{ asset('storage/' . $image->image_path) }}" class="card-img-top img-fluid rounded" alt="Dormitory Image">
+                        </a>
                     </div>
                 </div>
             @empty
@@ -83,4 +85,14 @@
         </div>
     </div>
 </div>
+
+<!-- Add some styling for the gallery -->
+<style>
+    .card-img-top {
+        transition: transform 0.3s ease;
+    }
+    .card-img-top:hover {
+        transform: scale(1.05);
+    }
+</style>
 @endsection
