@@ -13,11 +13,13 @@ use App\Http\Controllers\CommitteeCriteriaController;
 use App\Http\Controllers\Owner\DormitoryController;
 use App\Http\Controllers\Owner\EvaluationController;
 
+use App\Http\Controllers\DormController;
+
 // Landing Page (accessible without login)
 Route::view('/', 'landing');
 
-// Dormitories List (accessible without login)
-Route::view('/view-dormitories', 'dormitories');
+// Replace the static view route for dormitories with a dynamic route
+Route::get('/view-dormitories', [DormController::class, 'index'])->name('dormitories.view');
 
 // Registration for Dormitory Owner
 Route::get('/registration', function () {return view('dorm_owner_registration');})->name('register-dorm-owner');

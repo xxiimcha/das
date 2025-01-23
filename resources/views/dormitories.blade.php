@@ -13,48 +13,26 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between position-relative">
-                        <div class="ribbon ribbon-top-left"><span>FULL</span></div>
-                        <div class="d-flex align-items-center">
-                            <img src="{{ asset('images/dorm-image.jpg') }}" alt="Dormitory 1" class="mr-4" style="width: 100px; height: 100px; object-fit: cover;">
-                            <div>
-                                <h5 class="mb-1">Dormitory Name</h5>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Brgy Example</small>
+                    @forelse($dormitories as $dormitory)
+                        <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between position-relative">
+                            @if($dormitory->capacity <= 0)
+                                <div class="ribbon ribbon-top-left"><span>FULL</span></div>
+                            @endif
+                            <div class="d-flex align-items-center">
+                                <img src="{{ asset($dormitory->image ?? 'images/default-dorm.jpg') }}" alt="{{ $dormitory->name }}" class="mr-4" style="width: 100px; height: 100px; object-fit: cover;">
+                                <div>
+                                    <h5 class="mb-1">{{ $dormitory->name }}</h5>
+                                    <small class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ $dormitory->location }}</small>
+                                </div>
                             </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-danger mb-1">₱0.00 - ₱0.00</p>
-                            <button class="btn btn-dark btn-sm">View More</button>
-                        </div>
-                    </a>
-
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <img src="{{ asset('images/dorm-image.jpg') }}" alt="Dormitory 2" class="mr-4" style="width: 100px; height: 100px; object-fit: cover;">
-                            <div>
-                                <h5 class="mb-1">Dormitory Name</h5>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Brgy Example</small>
+                            <div class="text-right">
+                                <p class="text-danger mb-1">₱{{ $dormitory->price_range }}</p>
+                                <button class="btn btn-dark btn-sm">View More</button>
                             </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-danger mb-1">₱0.00 - ₱0.00</p>
-                            <button class="btn btn-dark btn-sm">View More</button>
-                        </div>
-                    </a>
-
-                    <a href="#" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <img src="{{ asset('images/dorm-image.jpg') }}" alt="Dormitory 3" class="mr-4" style="width: 100px; height: 100px; object-fit: cover;">
-                            <div>
-                                <h5 class="mb-1">Dormitory Name</h5>
-                                <small class="text-muted"><i class="fas fa-map-marker-alt"></i> Brgy Example</small>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-danger mb-1">₱0.00 - ₱0.00</p>
-                            <button class="btn btn-dark btn-sm">View More</button>
-                        </div>
-                    </a>
+                        </a>
+                    @empty
+                        <p class="text-muted">No accredited dormitories found.</p>
+                    @endforelse
                 </div>
             </div>
         </div>
