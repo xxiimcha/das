@@ -107,12 +107,7 @@
                                 <ul class="dropdown-menu" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item" href="#">Profile</a></li>
                                     <li><a class="dropdown-item" href="#">Settings</a></li>
-                                    <li>
-                                        <form action="{{ route('logout') }}" method="POST" style="display: none;" id="logoutForm">
-                                            @csrf
-                                        </form>
-                                        <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">Logout</a>
-                                    </li>
+                                    <li><a href="{{ route('logout') }}" class="dropdown-item">Logout</a></li>
                                 </ul>
                             </li>
                         @endguest
@@ -126,7 +121,13 @@
             <img src="{{ asset('images/dormitory-building.jpg') }}" alt="Dormitory Building" class="img-fluid">
             <div class="hero-overlay position-absolute d-flex flex-column justify-content-center align-items-center text-white">
                 <h1>Find the Best <span class="text-danger">Dormitory</span> for You</h1>
-                <button class="btn btn-danger mt-3" onclick="location.href='/registration';">List Your Dormitory</button>
+                @auth
+                @if(Auth::user()->role != 'user')
+                        <button class="btn btn-danger mt-3" onclick="location.href='/registration';">List Your Dormitory</button>
+                    @endif
+                @else
+                    <button class="btn btn-danger mt-3" onclick="location.href='/registration';">List Your Dormitory</button>
+                @endauth
             </div>
         </div>
 

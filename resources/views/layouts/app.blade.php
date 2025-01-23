@@ -61,15 +61,7 @@
                                 <ul class="dropdown-menu" aria-labelledby="userDropdown">
                                     <li><a class="dropdown-item" href="#">Profile</a></li>
                                     <li><a class="dropdown-item" href="#">Settings</a></li>
-                                    <li>
-                                        <a class="dropdown-item" href="#"
-                                            onclick="event.preventDefault(); document.getElementById('logoutForm').submit();">
-                                            Logout
-                                        </a>
-                                        <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                            @csrf
-                                        </form>
-                                    </li>
+                                    <li><a href="{{ route('logout') }}" class="dropdown-item">Logout</a></li>
                                 </ul>
                             </li>
                         @endguest

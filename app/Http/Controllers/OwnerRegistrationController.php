@@ -52,6 +52,7 @@ class OwnerRegistrationController extends Controller
                 'price_range' => $validated['price_range'],
                 'capacity' => $validated['dorm_capacity'],
                 'description' => $validated['dorm_description'],
+                'status' => 'pending',
             ]);
 
             foreach ($validated['amenities'] as $index => $amenity) {

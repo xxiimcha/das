@@ -1,0 +1,186 @@
+### Pseudocode for Dormitory Accreditation System (DAS)
+
+---
+
+### **1. User Roles and Functionalities**
+
+#### **1.1 Admin**
+```plaintext
+Function AdminDashboard():
+    Display:
+        - User Management: Create Committee Accounts
+        - View System Logs
+
+Function CreateCommitteeAccount(committeeDetails):
+    Validate committeeDetails
+    If valid:
+        Insert committeeDetails into 'users' table with role = "Committee"
+    Else:
+        Display "Invalid details"
+
+Function ViewSystemLogs():
+    Query 'logs' table for all activity logs
+    Display logs in tabular format
+```
+
+#### **1.2 Committee**
+```plaintext
+Function CommitteeDashboard():
+    Display:
+        - Manage Criteria
+        - Manage Accreditation
+        - Schedule Inspections
+
+Function SetAccreditationCriteria(criteriaDetails):
+    Validate criteriaDetails
+    If valid:
+        Insert or Update 'criteria' table with criteriaDetails
+    Else:
+        Display "Invalid criteria data"
+
+Function EvaluateDormitory(dormID, evaluationDetails):
+    Find dormitory by dormID in 'dormitories' table
+    If found:
+        Validate evaluationDetails
+        If valid:
+            Update 'dormitories' table with status = "Passed" or "Failed"
+        Else:
+            Display "Invalid evaluation data"
+    Else:
+        Display "Dormitory not found"
+
+Function ScheduleInspection(dormID, inspectionDate):
+    Find dormitory by dormID in 'dormitories' table
+    If found:
+        Validate inspectionDate
+        If valid:
+            Insert inspection schedule into 'inspections' table
+        Else:
+            Display "Invalid date"
+    Else:
+        Display "Dormitory not found"
+```
+
+#### **1.3 Dormitory Owner**
+```plaintext
+Function DormitoryOwnerDashboard():
+    Display:
+        - Submit Dormitory Documents
+        - Check Registration Status
+        - View Inspection Results
+
+Function SubmitDormitory(dormDetails, documents):
+    Validate dormDetails and documents
+    If valid:
+        Insert dormDetails into 'dormitories' table with status = "Pending"
+        Upload documents to file storage
+    Else:
+        Display "Invalid data"
+
+Function CheckDormitoryStatus(dormID):
+    Query 'dormitories' table for dormID
+    If found:
+        Display current status (e.g., Pending, Passed, Failed)
+    Else:
+        Display "Dormitory not found"
+
+Function ViewInspectionResult(dormID):
+    Query 'inspections' and 'dormitories' tables for dormID
+    If found:
+        Display inspection report and accreditation result
+    Else:
+        Display "Result not available"
+```
+
+#### **1.4 User (Students/Parents)**
+```plaintext
+Function UserDashboard():
+    Display:
+        - Create Account to Schedule Visit
+        - View Dormitory Details
+
+Function CreateAccount(userDetails):
+    Validate userDetails
+    If valid:
+        Insert userDetails into 'users' table with role = "User"
+    Else:
+        Display "Invalid details"
+
+Function ScheduleDormVisit(dormID, visitDate):
+    Validate visitDate
+    If valid:
+        Insert visit schedule into 'visits' table
+    Else:
+        Display "Invalid date"
+
+Function ViewDormDetails(dormID):
+    Query 'dormitories' table for dormID
+    If dormID found AND status = "Accredited":
+        Display dormitory details (e.g., name, location, features)
+    Else:
+        Display "Dormitory not found or not accredited"
+```
+
+---
+
+### **2. Common Functionalities**
+```plaintext
+Function Login(username, password):
+    Query 'users' table for username
+    If username exists AND password matches:
+        Grant access to specific dashboard based on role (Admin, Committee, Dormitory Owner, User)
+    Else:
+        Display "Invalid credentials"
+
+Function Logout():
+    End user session
+    Redirect to login page
+```
+
+---
+
+### **3. Database Structure**
+**Users Table:**
+- user_id, username, password, role (Admin, Committee, Dormitory Owner, User)
+
+**Dormitories Table:**
+- dorm_id, owner_id, name, location, status (Pending, Accredited, Failed)
+
+**Criteria Table:**
+- criteria_id, description, weightage
+
+**Accreditations Table:**
+- accreditation_id, dorm_id, status, evaluation_notes
+
+**Inspections Table:**
+- inspection_id, dorm_id, inspection_date, status
+
+**Visits Table:**
+- visit_id, user_id, dorm_id, visit_date
+
+**Documents Table:**
+- document_id, dorm_id, file_path, uploaded_at
+
+---
+
+### **4. System Maintenance**
+```plaintext
+Function BackupDatabase():
+    Create a backup of the MySQL database
+    Store backup file in a secure location
+
+Function RestoreDatabase(backupFile):
+    Validate backupFile
+    If valid:
+        Restore database from backupFile
+    Else:
+        Display "Invalid backup file"
+```
+
+---
+
+### **5. System Termination**
+```plaintext
+Logout User
+Close System
+```
