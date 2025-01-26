@@ -128,12 +128,6 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-12">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-danger"><i class="fas fa-save"></i> Save</button>

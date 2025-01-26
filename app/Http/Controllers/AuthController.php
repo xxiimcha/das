@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use App\Mail\WelcomeEmail;
 
 class AuthController extends Controller
@@ -17,35 +19,60 @@ class AuthController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
 
-        $credentials = $request->only('email', 'password');
+     public function login(Request $request)
+     {
+         $request->validate([
+             'email' => 'required|email',
+             'password' => 'required|string|min:6',
+         ]);
 
-        if (Auth::attempt($credentials)) {
-            $role = Auth::user()->role;
+         $credentials = $request->only('email', 'password');
 
-            switch ($role) {
-                case 'admin':
-                    return redirect()->route('dashboard')->with('success', 'Welcome to the Admin Dashboard!');
-                case 'committee':
-                    return redirect()->route('committee.dashboard')->with('success', 'Welcome to the Committee Dashboard!');
-                case 'owner':
-                    return redirect()->route('owner.dashboard')->with('success', 'Welcome to the Owner Dashboard!');
-                case 'user': // Redirect user role to landing page
-                    return redirect('/')->with('success', 'Welcome back, ' . Auth::user()->name . '!');
-                default:
-                    Auth::logout();
-                    return redirect()->route('login')->with('error', 'Unauthorized role. Please contact the administrator.');
-            }
-        }
+         // Log the login attempt
+         Log::info('Login attempt received', [
+             'email' => $request->email,
+             'entered_password' => $request->password,
+         ]);
 
-        return back()->with('error', 'Invalid credentials provided.');
-    }
+         if (Auth::attempt($credentials)) {
+             // Regenerate session for security
+             $request->session()->regenerate();
+
+             // Get the authenticated user's role
+             $user = Auth::user();
+             $role = $user->role;
+
+             // Log the successful login
+             Log::info('Login successful', [
+                 'user_id' => $user->id,
+                 'role' => $role,
+             ]);
+
+             // Redirect based on user role
+             switch ($role) {
+                 case 'admin':
+                     return redirect()->route('dashboard')->with('success', 'Welcome to the Admin Dashboard!');
+                 case 'committee':
+                     return redirect()->route('committee.dashboard')->with('success', 'Welcome to the Committee Dashboard!');
+                 case 'owner':
+                     return redirect()->route('owner.dashboard')->with('success', 'Welcome to the Owner Dashboard!');
+                 case 'user':
+                     return redirect('/')->with('success', 'Welcome back, ' . $user->name . '!');
+                 default:
+                     Auth::logout(); // Log out unauthorized roles
+                     Log::warning('Unauthorized role detected', ['user_id' => $user->id, 'role' => $role]);
+                     return redirect()->route('login')->with('error', 'Unauthorized role. Please contact the administrator.');
+             }
+         }
+
+         // Log the failed login attempt
+         Log::warning('Login failed: Invalid credentials', [
+             'email' => $request->email,
+         ]);
+
+         return back()->with('error', 'Invalid login credentials.');
+     }
 
     /**
      * Show the registration form.
@@ -69,24 +96,42 @@ class AuthController extends Controller
         ]);
 
         try {
-            // Create the user
-            $user = User::create([
+            // Hash the password once
+            $hashedPassword = Hash::make($request->password);
+
+            // Log the hashed password
+            Log::info('Hashing password for user registration.', [
+                'email' => $request->email,
+                'plaintext_password' => $request->password,
+                'hashed_password' => $hashedPassword,
+            ]);
+
+            // Directly insert the data into the database
+            DB::table('users')->insert([
                 'name' => $request->firstname . ' ' . $request->lastname,
                 'email' => $request->email,
-                'mobile' => $request->mobile,
-                'role' => 'user', // Set role to 'user'
-                'password' => Hash::make($request->password),
+                'role' => 'user',
+                'password' => $hashedPassword,
+            ]);
+
+            Log::info('User registration successful with direct DB insert.', [
+                'email' => $request->email,
+                'hashed_password_saved' => $hashedPassword,
             ]);
 
             // Send Welcome Email
-            Mail::to($user->email)->send(new WelcomeEmail($user->name));
+            Mail::to($request->email)->send(new WelcomeEmail($request->firstname . ' ' . $request->lastname));
 
-            // Redirect back to login page with success message
             return response()->json([
                 'success' => true,
                 'message' => 'Account created successfully! A welcome email has been sent.',
             ], 201);
         } catch (\Exception $e) {
+            Log::error('Registration failed.', [
+                'error' => $e->getMessage(),
+                'email' => $request->email,
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred during registration. Please try again.',
