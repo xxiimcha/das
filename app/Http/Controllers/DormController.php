@@ -16,4 +16,12 @@ class DormController extends Controller
         return view('dormitories', compact('dormitories'));
     }
 
+    /**
+     * Show the details of a specific dormitory.
+     */
+    public function show($id)
+    {
+        $dormitory = Dormitory::findOrFail($id); // Fetch dormitory by ID
+        return view('dormitories.show', compact('dormitory')); // Return the show.blade.php view
+    }
 }

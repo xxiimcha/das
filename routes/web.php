@@ -20,6 +20,7 @@ Route::view('/', 'landing');
 
 // Replace the static view route for dormitories with a dynamic route
 Route::get('/view-dormitories', [DormController::class, 'index'])->name('dormitories.view');
+Route::get('/view-dormitories/{id}', [DormController::class, 'show'])->name('public.dormitories.show');
 
 // Registration for Dormitory Owner
 Route::get('/registration', function () {return view('dorm_owner_registration');})->name('register-dorm-owner');
