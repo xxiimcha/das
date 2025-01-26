@@ -15,64 +15,85 @@ class CommitteeCriteriaController extends Controller
      */
     public function index()
     {
-        $columns = CriteriaColumn::all(); // Fetch all dynamic columns
-        $criteria = Criteria::all(); // Fetch all criteria rows
+        // Fetch columns from criteria_columns
+        $columns = CriteriaColumn::select('id', 'name')->get();
 
-        return response()->json([
-            'columns' => $columns,
-            'criteria' => $criteria,
-        ]);
+        // Fetch criteria from criterias
+        $criteria = Criteria::select('id', 'criteria_name', 'values')->get();
+
+        // Decode JSON values in the 'values' column only if it's a string
+        $criteria->map(function ($item) {
+            if (is_string($item->values)) {
+                $item->values = json_decode($item->values, true);
+            }
+            return $item;
+        });
+
+        // Pass the data to the Blade view
+        return view('committee.criteria', compact('columns', 'criteria'));
     }
 
-    /**
-     * Save a new column.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function saveColumn(Request $request)
+    public function addRow(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        CriteriaColumn::create(['name' => $request->name]);
-
-        return response()->json(['success' => 'Column added successfully!']);
-    }
-
-    /**
-     * Save a new row.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function saveRow(Request $request)
-    {
-        $request->validate([
-            'criteria_name' => 'required|string|max:255',
-            'values' => 'nullable|array', // Dynamic values for each column
-        ]);
-
-        Criteria::create([
+        $criteria = Criteria::create([
             'criteria_name' => $request->criteria_name,
             'values' => json_encode($request->values),
         ]);
 
-        return response()->json(['success' => 'Row added successfully!']);
+        return response()->json(['success' => true, 'criteria' => $criteria]);
     }
 
-    /**
-     * Delete a row.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
+    public function addColumn(Request $request)
+    {
+        $column = CriteriaColumn::create([
+            'name' => $request->column_name,
+        ]);
+
+        return response()->json(['success' => true, 'column' => $column]);
+    }
+
     public function deleteRow($id)
     {
         $criteria = Criteria::findOrFail($id);
         $criteria->delete();
 
-        return response()->json(['success' => 'Row deleted successfully!']);
+        return response()->json(['success' => true]);
     }
+
+
+    public function updateCell(Request $request)
+    {
+        $criteria = Criteria::findOrFail($request->id);
+        $values = json_decode($criteria->values, true);
+        $values[$request->column_index - 1] = $request->value; // Adjust for column offset
+        $criteria->values = json_encode($values);
+        $criteria->save();
+
+        return response()->json(['success' => true]);
+    }
+
+    public function saveChanges(Request $request)
+    {
+        $changes = $request->changes;
+
+        foreach ($changes as $change) {
+            if ($change['id']) {
+                // Update existing row
+                $criteria = Criteria::findOrFail($change['id']);
+                $values = json_decode($criteria->values, true);
+                $values[$change['columnIndex'] - 1] = $change['value']; // Adjust column offset
+                $criteria->values = json_encode($values);
+                $criteria->save();
+            } else {
+                // Handle new row creation if necessary
+                Criteria::create([
+                    'criteria_name' => $change['value'], // Adjust as needed
+                    'values' => json_encode([]),
+                ]);
+            }
+        }
+
+        return response()->json(['success' => true]);
+    }
+
 }

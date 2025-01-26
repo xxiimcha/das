@@ -59,9 +59,15 @@ Route::middleware('auth')->group(function () {
 
     // Criteria Module
     Route::get('/committee/criteria', [CommitteeCriteriaController::class, 'index'])->name('criteria.index');
-    Route::post('/committee/criteria/column', [CommitteeCriteriaController::class, 'saveColumn'])->name('criteria.column.save');
-    Route::post('/committee/criteria/row', [CommitteeCriteriaController::class, 'saveRow'])->name('criteria.row.save');
+    // Route to add a new row (criteria)
+    Route::post('/committee/criteria/row', [CommitteeCriteriaController::class, 'addRow'])->name('criteria.row.add');
+    // Route to add a new column
+    Route::post('/committee/criteria/column', [CommitteeCriteriaController::class, 'addColumn'])->name('criteria.column.add');
+    // Route to delete a row (criteria) by ID
     Route::delete('/committee/criteria/row/{id}', [CommitteeCriteriaController::class, 'deleteRow'])->name('criteria.row.delete');
+    // Route to update a cell value in a row
+    Route::post('/committee/criteria/row/update', [CommitteeCriteriaController::class, 'updateCell'])->name('criteria.row.update');
+    Route::post('/committee/criteria/save', [CommitteeCriteriaController::class, 'saveChanges'])->name('criteria.save.changes');
 
     // Owner
     // Links

@@ -59,7 +59,7 @@ class UserController extends Controller
 
         Log::info('User record after saving', [
             'user_id' => $user->id,
-            'hashed_password_in_db' => $user->password,
+            'hashed_password_in_db' => $hashedPassword,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User added successfully with default password!');
