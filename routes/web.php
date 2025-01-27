@@ -56,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/committee/dormitories', [CommitteeDormitoryController::class, 'index'])->name('committee.dormitories');
     Route::post('/committee/dormitories', [CommitteeDormitoryController::class, 'store'])->name('committee.dormitories.store');
     Route::delete('/committee/dormitories/{id}', [CommitteeDormitoryController::class, 'destroy'])->name('committee.dormitories.destroy');
+    Route::get('/committee/dormitories/{id}', [CommitteeDormitoryController::class, 'show'])->name('committee.dormitories.show');
+    Route::post('/committee/dormitories/{id}/approve', [CommitteeDormitoryController::class, 'approve'])->name('committee.dormitories.approve');
+    Route::post('/committee/dormitories/{id}/decline', [CommitteeDormitoryController::class, 'decline'])->name('committee.dormitories.decline');
 
     // Criteria Module
     Route::get('/committee/criteria', [CommitteeCriteriaController::class, 'index'])->name('criteria.index');

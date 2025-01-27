@@ -8,10 +8,7 @@
 @section('content')
 <div class="card shadow card-danger card-outline">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title"><i class="fas fa-house-user"></i> Dormitories</h3>
-        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addDormitoryModal">
-            <i class="fas fa-plus-circle"></i> Add Dormitory
-        </button>
+        <h3 class="card-title">Dormitories</h3>
     </div>
     <div class="card-body">
         <!-- Toastr Alerts -->
@@ -52,17 +49,12 @@
                     </td>
                     <td>{{ $dormitory->created_at->format('M d, Y') }}</td>
                     <td>
-                        <div class="dropdown">
-                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="actionDropdown{{ $dormitory->id }}" data-bs-toggle="dropdown" aria-expanded="false">
-                                Actions
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="actionDropdown{{ $dormitory->id }}">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye"></i> View</a></li>
-                                <li><a class="dropdown-item text-danger delete-dormitory-btn" href="#" data-id="{{ $dormitory->id }}" data-name="{{ $dormitory->name }}" data-bs-toggle="modal" data-bs-target="#deleteDormitoryModal">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a></li>
-                            </ul>
-                        </div>
+                        <a href="{{ route('committee.dormitories.show', $dormitory->id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a class="btn btn-danger btn-sm delete-dormitory-btn" href="#" data-id="{{ $dormitory->id }}" data-name="{{ $dormitory->name }}" data-bs-toggle="modal" data-bs-target="#deleteDormitoryModal">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
                     </td>
                 </tr>
                 @endforeach
@@ -70,4 +62,41 @@
         </table>
     </div>
 </div>
+
+<!-- Delete Dormitory Modal -->
+<div class="modal fade" id="deleteDormitoryModal" tabindex="-1" aria-labelledby="deleteDormitoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteDormitoryModalLabel">Delete Dormitory</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this dormitory?
+            </div>
+            <div class="modal-footer">
+                <form id="deleteDormitoryForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteDormitoryBtns = document.querySelectorAll('.delete-dormitory-btn');
+
+        deleteDormitoryBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const dormitoryId = btn.getAttribute('data-id');
+                const form = document.getElementById('deleteDormitoryForm');
+                form.action = `/committee/dormitories/${dormitoryId}`;
+            });
+        });
+    });
+</script>
 @endsection
