@@ -84,6 +84,30 @@
                 </ul>
             </div>
         </div>
+        @if ($dormitory->status !== 'pending' && $dormitory->status !== 'rejected')
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Schedule and Evaluation:</h4>
+                <table class="table table-bordered">
+                    <thead class="bg-danger text-white">
+                        <tr>
+                            <th>Evaluation Date</th>
+                            <th>Evaluator</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ $dormitory->schedule->evaluation_date ?? 'N/A' }}</td>
+                            <td>John Doe</td> <!-- Static evaluator name for now -->
+                            <td>Pass</td> <!-- Static result for now -->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 
