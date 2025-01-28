@@ -12,8 +12,21 @@ class AccreditationSchedule extends Model
     protected $fillable = [
         'dormitory_id',
         'evaluation_date',
+        'status',
     ];
 
+    /**
+     * Cast attributes to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'evaluation_date' => 'date', // Ensure it's treated as a date
+    ];
+
+    /**
+     * Relationship: Schedule belongs to a dormitory.
+     */
     public function dormitory()
     {
         return $this->belongsTo(Dormitory::class);

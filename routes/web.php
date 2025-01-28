@@ -87,6 +87,7 @@ Route::middleware('auth')->group(function () {
     // Evaluation Module
     Route::get('/evaluation', [EvaluationController::class, 'index'])->name('evaluation.index');
     Route::get('/evaluation/{id}', [EvaluationController::class, 'show'])->name('evaluation.show');
+    Route::get('/committee/evaluation', [EvaluationController::class, 'showEvaluationSchedules'])->name('evaluation.schedules');
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
