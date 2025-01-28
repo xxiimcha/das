@@ -88,6 +88,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/evaluation', [EvaluationController::class, 'index'])->name('evaluation.index');
     Route::get('/evaluation/{id}', [EvaluationController::class, 'show'])->name('evaluation.show');
     Route::get('/committee/evaluation', [EvaluationController::class, 'showEvaluationSchedules'])->name('evaluation.schedules');
+    Route::get('/committee/evaluation/form', [EvaluationController::class, 'showForm'])->name('evaluation.form');
+    Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submitEvaluation'])->name('evaluation.submit');
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

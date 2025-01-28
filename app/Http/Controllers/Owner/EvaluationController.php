@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dormitory;
-use App\Models\AccreditationSchedule; // Assuming this model exists
+use App\Models\AccreditationSchedule;
+use App\Models\Criteria;
+use App\Models\CriteriaColumn;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class EvaluationController extends Controller
 {
@@ -32,11 +36,26 @@ class EvaluationController extends Controller
     /**
      * Display all evaluation schedules.
      */
+
     public function showEvaluationSchedules()
     {
-        // Fetch all schedules using Eloquent
-        $schedules = AccreditationSchedule::all(); // Assuming AccreditationSchedule is the model for `accreditation_schedules` table
+        $schedules = AccreditationSchedule::with('dormitory')->get();
+        $criterias = Criteria::all();
+        $criteriaColumns = CriteriaColumn::all();
 
-        return view('committee.evaluation.index', compact('schedules')); // Pass schedules to the view
+        return view('committee.evaluation.index', compact('schedules', 'criterias', 'criteriaColumns'));
     }
+
+    public function showForm(Request $request)
+    {
+        $scheduleId = $request->query('schedule_id');
+        $schedule = AccreditationSchedule::with('dormitory')->findOrFail($scheduleId);
+        $criterias = Criteria::all();
+        $criteriaColumns = CriteriaColumn::all();
+        $evaluatorName = Auth::user()->name ?? 'Guest';
+        $evaluationDate = now()->format('Y-m-d\TH:i');
+
+        return view('committee.evaluation.form', compact('schedule', 'criterias', 'criteriaColumns', 'evaluatorName', 'evaluationDate'));
+    }
+
 }
