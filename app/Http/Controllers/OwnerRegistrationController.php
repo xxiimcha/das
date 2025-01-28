@@ -16,7 +16,6 @@ use App\Mail\OwnerRegistrationMail;
 
 class OwnerRegistrationController extends Controller
 {
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -37,14 +36,30 @@ class OwnerRegistrationController extends Controller
         try {
             DB::beginTransaction();
 
-            $password = 'password123'; // Or generate a random password
-            $user = User::create([
+            // Generate the default password
+            $plaintextPassword = 'password123'; // Default password
+            $hashedPassword = Hash::make($plaintextPassword);
+
+            // Prepare the user data
+            $userData = [
                 'name' => $validated['owner_name'],
                 'email' => $validated['owner_email'],
-                'password' => Hash::make($password), // Password is hashed using Hash::make()
+                'password' => $hashedPassword, // Explicitly use the hashed password
                 'role' => 'owner',
+                'status' => 'pending', // Default status
+            ];
+
+            Log::info('Final user data being inserted', $userData);
+
+            // Save the user and log the saved record
+            $user = User::create($userData);
+
+            Log::info('User record after saving', [
+                'user_id' => $user->id,
+                'hashed_password_in_db' => $user->password,
             ]);
 
+            // Create dormitory and related data
             $dormitory = Dormitory::create([
                 'user_id' => $user->id,
                 'name' => $validated['dorm_name'],
@@ -89,7 +104,7 @@ class OwnerRegistrationController extends Controller
             $details = [
                 'name' => $validated['owner_name'],
                 'email' => $validated['owner_email'],
-                'password' => $password,
+                'password' => $plaintextPassword, // Send the plain password for reference
             ];
 
             Mail::to($validated['owner_email'])->send(new OwnerRegistrationMail($details));

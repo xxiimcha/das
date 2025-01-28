@@ -51,17 +51,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Hash the password before saving it to the database.
-     *
-     * @param string $value
-     * @return void
-     */
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = Hash::make($value);
-    }
-
-    /**
      * Relationship: User owns multiple dormitories.
      */
     public function dormitories()
