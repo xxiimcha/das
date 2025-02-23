@@ -9,9 +9,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommitteeDormitoryController;
 use App\Http\Controllers\CommitteeDashboardController;
 use App\Http\Controllers\CommitteeCriteriaController;
+use App\Http\Controllers\CommitteeEvaluationController;
 
 use App\Http\Controllers\Owner\DormitoryController;
 use App\Http\Controllers\Owner\EvaluationController;
+
 
 use App\Http\Controllers\DormController;
 
@@ -62,15 +64,14 @@ Route::middleware('auth')->group(function () {
 
     // Criteria Module
     Route::get('/committee/criteria', [CommitteeCriteriaController::class, 'index'])->name('criteria.index');
-    // Route to add a new row (criteria)
     Route::post('/committee/criteria/row', [CommitteeCriteriaController::class, 'addRow'])->name('criteria.row.add');
-    // Route to add a new column
     Route::post('/committee/criteria/column', [CommitteeCriteriaController::class, 'addColumn'])->name('criteria.column.add');
-    // Route to delete a row (criteria) by ID
     Route::delete('/committee/criteria/row/{id}', [CommitteeCriteriaController::class, 'deleteRow'])->name('criteria.row.delete');
-    // Route to update a cell value in a row
     Route::post('/committee/criteria/row/update', [CommitteeCriteriaController::class, 'updateCell'])->name('criteria.row.update');
     Route::post('/committee/criteria/save', [CommitteeCriteriaController::class, 'saveChanges'])->name('criteria.save.changes');
+
+    // Evaluation Module 
+    Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submit'])->name('evaluation.submit');
 
     // Owner
     // Links
@@ -89,7 +90,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/evaluation/{id}', [EvaluationController::class, 'show'])->name('evaluation.show');
     Route::get('/committee/evaluation', [EvaluationController::class, 'showEvaluationSchedules'])->name('evaluation.schedules');
     Route::get('/committee/evaluation/form', [EvaluationController::class, 'showForm'])->name('evaluation.form');
-    Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submitEvaluation'])->name('evaluation.submit');
 
     // Logout Route
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
