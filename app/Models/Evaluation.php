@@ -31,4 +31,9 @@ class Evaluation extends Model
         return $this->hasMany(EvaluationDetail::class, 'evaluation_id');
     }
 
+
+    public function criteria()
+    {
+        return $this->hasMany(Criteria::class);
+    }
 }

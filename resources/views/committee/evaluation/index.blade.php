@@ -43,15 +43,24 @@
                     <td>{{ $schedule->dormitory->name ?? 'N/A' }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->evaluation_date)->format('M d, Y') }}</td>
                     <td>
-                        <span class="badge {{ $schedule->status === 'completed' ? 'bg-success' : ($schedule->status === 'pending' ? 'bg-warning' : 'bg-secondary') }}">
+                        <span class="badge 
+                            {{ $schedule->status === 'completed' ? 'bg-success' : 
+                            ($schedule->status === 'pending' ? 'bg-warning text-dark' : 
+                            ($schedule->status === 'under review' ? 'bg-primary' : 'bg-secondary')) }}">
                             {{ ucfirst($schedule->status) }}
                         </span>
                     </td>
                     <td>{{ \Carbon\Carbon::parse($schedule->created_at)->format('M d, Y') }}</td>
                     <td>
-                        <a href="{{ route('evaluation.form', ['schedule_id' => $schedule->id]) }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-check-circle"></i> Evaluate
-                        </a>
+                        @if ($schedule->status === 'pending')
+                            <a href="{{ route('evaluation.form', ['schedule_id' => $schedule->id]) }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-check-circle"></i> Evaluate
+                            </a>
+                        @else
+                            <a href="{{ route('evaluation.review', ['schedule_id' => $schedule->id]) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Review
+                            </a>
+                        @endif
                     </td>
                 </tr>
                 @endforeach

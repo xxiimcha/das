@@ -59,6 +59,13 @@ class EvaluationController extends Controller
         return view('committee.evaluation.form', compact('schedule', 'criterias', 'criteriaColumns', 'evaluatorName', 'evaluationDate'));
     }
 
+    public function review($schedule_id)
+    {
+        $schedule = AccreditationSchedule::with('evaluations.criteria')->findOrFail($schedule_id);
+
+        return view('evaluation.review', compact('schedule'));
+    }
+
     public function submit(Request $request)
     {
         // Debugging: Log request data

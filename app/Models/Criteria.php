@@ -12,4 +12,10 @@ class Criteria extends Model
     protected $casts = [
         'values' => 'array',
     ];
+
+
+    public function evaluation()
+    {
+        return $this->belongsTo(Evaluation::class);
+    }
 }

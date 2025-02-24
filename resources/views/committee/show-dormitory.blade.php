@@ -104,24 +104,23 @@
                         @forelse ($dormitory->accreditationSchedules ?? [] as $schedule)
                             @forelse ($schedule->evaluations ?? [] as $evaluation)
                             <tr>
-    <td>{{ $evaluation->evaluation_date ? \Carbon\Carbon::parse($evaluation->evaluation_date)->format('M d, Y') : 'N/A' }}</td>
-    <td>{{ $evaluation->evaluator_name ?? 'Unknown' }}</td>
-    <td>{{ $evaluation->schedule->status ?? 'Pending' }}</td>
-    <td>
-        <!-- View Button to Open Modal -->
-        <button class="btn btn-info btn-sm view-evaluation-btn" 
-                data-id="{{ $evaluation->id }}"
-                data-date="{{ $evaluation->evaluation_date }}"
-                data-evaluator="{{ $evaluation->evaluator_name }}"
-                data-result="{{ $evaluation->schedule->status ?? 'Pending' }}"
-                data-criteria="{{ json_encode($evaluation->details->map(function($detail) { 
-                    return ['criteria_name' => $detail->criteria->criteria_name ?? 'Unknown', 'rating' => $detail->rating]; 
-                })) }}">
-            <i class="fas fa-eye"></i> View
-        </button>
-    </td>
-</tr>
-
+                                <td>{{ $evaluation->evaluation_date ? \Carbon\Carbon::parse($evaluation->evaluation_date)->format('M d, Y') : 'N/A' }}</td>
+                                <td>{{ $evaluation->evaluator_name ?? 'Unknown' }}</td>
+                                <td>{{ $evaluation->schedule->status ?? 'Pending' }}</td>
+                                <td>
+                                    <!-- View Button to Open Modal -->
+                                    <button class="btn btn-info btn-sm view-evaluation-btn" 
+                                            data-id="{{ $evaluation->id }}"
+                                            data-date="{{ $evaluation->evaluation_date }}"
+                                            data-evaluator="{{ $evaluation->evaluator_name }}"
+                                            data-result="{{ $evaluation->schedule->status ?? 'Pending' }}"
+                                            data-criteria="{{ json_encode($evaluation->details->map(function($detail) { 
+                                                return ['criteria_name' => $detail->criteria->criteria_name ?? 'Unknown', 'rating' => $detail->rating]; 
+                                            })) }}">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
                             @empty
                                 <tr>
                                     <td colspan="4" class="text-center">No evaluations yet</td>
@@ -203,15 +202,11 @@
                 </div>
                 <div class="mb-3">
                     <strong>Result:</strong>
-                    <select id="modal-evaluation-result" class="form-control">
-                        <option value="Pending">Pending</option>
-                        <option value="Pass">Pass</option>
-                        <option value="Fail">Fail</option>
-                    </select>
+                    <p id="modal-evaluation-result" class="badge"></p>
                 </div>
                 <div class="mb-3">
                     <strong>Remarks:</strong>
-                    <textarea id="modal-remarks" class="form-control" rows="3" placeholder="Enter remarks here..."></textarea>
+                    <textarea id="modal-remarks" class="form-control" rows="3" placeholder="No remarks available" readonly></textarea>
                 </div>
                 <hr>
                 <h5>Criteria & Ratings</h5>
@@ -229,7 +224,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="save-evaluation-changes">Save Changes</button>
             </div>
         </div>
     </div>
@@ -237,17 +231,14 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    let evaluationId = null;
-
     const viewButtons = document.querySelectorAll(".view-evaluation-btn");
-    const saveButton = document.getElementById("save-evaluation-changes");
 
     viewButtons.forEach(button => {
         button.addEventListener("click", function() {
-            evaluationId = button.getAttribute("data-id");
             const evaluationDate = button.getAttribute("data-date") || "N/A";
             const evaluatorName = button.getAttribute("data-evaluator") || "Unknown";
             const evaluationResult = button.getAttribute("data-result") || "Pending";
+            const remarks = button.getAttribute("data-remarks") || "No remarks available";
             const criteriaData = button.getAttribute("data-criteria");
 
             let parsedCriteria = [];
@@ -263,10 +254,14 @@ document.addEventListener("DOMContentLoaded", function() {
             // Populate modal fields
             document.getElementById("modal-evaluation-date").textContent = evaluationDate;
             document.getElementById("modal-evaluator-name").textContent = evaluatorName;
-            document.getElementById("modal-evaluation-result").value = evaluationResult;
+            document.getElementById("modal-evaluation-result").textContent = evaluationResult;
+            document.getElementById("modal-remarks").value = remarks;
 
-            // Clear remarks field
-            document.getElementById("modal-remarks").value = "";
+            // Add badge color for evaluation result
+            const resultBadge = document.getElementById("modal-evaluation-result");
+            resultBadge.className = "badge " + 
+                (evaluationResult === "Pass" ? "bg-success" : 
+                (evaluationResult === "Fail" ? "bg-danger" : "bg-secondary"));
 
             // Populate Criteria Table
             let criteriaTableBody = document.getElementById("modal-criteria-body");
@@ -288,42 +283,6 @@ document.addEventListener("DOMContentLoaded", function() {
             new bootstrap.Modal(document.getElementById("evaluationModal")).show();
         });
     });
-
-    // Handle Save Changes Button Click
-    saveButton.addEventListener("click", function() {
-        if (!evaluationId) {
-            alert("Invalid evaluation ID!");
-            return;
-        }
-
-        const updatedResult = document.getElementById("modal-evaluation-result").value;
-        const updatedRemarks = document.getElementById("modal-remarks").value;
-
-        fetch(`/committee/evaluations/update/${evaluationId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-            },
-            body: JSON.stringify({
-                result: updatedResult,
-                remarks: updatedRemarks
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert("Evaluation updated successfully!");
-                location.reload();
-            } else {
-                alert("Failed to update evaluation.");
-            }
-        })
-        .catch(error => {
-            console.error("Error updating evaluation:", error);
-        });
-    });
 });
-
 </script>
 @endsection
