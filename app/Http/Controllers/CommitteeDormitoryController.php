@@ -31,11 +31,20 @@ class CommitteeDormitoryController extends Controller
      */
     public function show($id)
     {
-        $dormitory = Dormitory::with(['owner', 'amenities', 'images', 'documents'])->findOrFail($id);
+        $dormitory = Dormitory::with([
+            'owner',
+            'amenities',
+            'images',
+            'documents',
+            'accreditationSchedules.evaluations.details.criteria'
+        ])->findOrFail($id);
 
-        return view('committee.show-dormitory', compact('dormitory'));
+        // Get the latest accreditation schedule for status
+        $schedule = $dormitory->accreditationSchedules->last();
+        $status = $schedule ? $schedule->status : 'N/A';
+
+        return view('committee.show-dormitory', compact('dormitory', 'status'));
     }
-
 
     /**
      * Store a newly created dormitory in storage.

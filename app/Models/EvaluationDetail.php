@@ -16,4 +16,10 @@ class EvaluationDetail extends Model
     {
         return $this->belongsTo(Evaluation::class);
     }
+
+    public function criteria()
+    {
+        return $this->belongsTo(Criteria::class, 'criteria_id');
+    }
+
 }

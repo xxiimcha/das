@@ -38,4 +38,10 @@ class Dormitory extends Model
     {
         return $this->hasMany(DormitoryDocument::class);
     }
+
+    public function accreditationSchedules()
+    {
+        return $this->hasMany(AccreditationSchedule::class, 'dormitory_id');
+    }
+
 }

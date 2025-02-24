@@ -15,20 +15,13 @@ class AccreditationSchedule extends Model
         'status',
     ];
 
-    /**
-     * Cast attributes to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'evaluation_date' => 'date', // Ensure it's treated as a date
-    ];
-
-    /**
-     * Relationship: Schedule belongs to a dormitory.
-     */
     public function dormitory()
     {
-        return $this->belongsTo(Dormitory::class);
+        return $this->belongsTo(Dormitory::class, 'dormitory_id');
+    }
+
+    public function evaluations()
+    {
+        return $this->hasMany(Evaluation::class, 'schedule_id');
     }
 }
