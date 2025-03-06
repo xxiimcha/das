@@ -8,13 +8,15 @@ class CreateEvaluationsTable extends Migration
 {
     public function up()
     {
-        Schema::create('evaluations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('schedule_id')->constrained()->onDelete('cascade');
-            $table->string('evaluator_name');
-            $table->dateTime('evaluation_date');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('evaluations')) {
+            Schema::create('evaluations', function (Blueprint $table) {
+                $table->id();
+                $table->bigInteger('schedule_id')->unsigned();
+                $table->string('evaluator_name');
+                $table->dateTime('evaluation_date');
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()
