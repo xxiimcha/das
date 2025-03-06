@@ -124,6 +124,12 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="{{ route('criteria.index') }}" class="nav-link {{ request()->routeIs('criteria.index') ? 'active' : '' }}">
+                                    <i class="nav-icon bi bi-gear"></i>
+                                    <p>Set Criteria</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
                                     <i class="nav-icon bi bi-people-fill"></i>
                                     <p>Users</p>
@@ -146,12 +152,6 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('criteria.index') }}" class="nav-link {{ request()->routeIs('criteria.index') ? 'active' : '' }}">
-                                    <i class="nav-icon bi bi-gear"></i>
-                                    <p>Set Criteria</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-calendar-check"></i>
                                     <p>Inspection</p>
@@ -167,12 +167,6 @@
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-clipboard-check"></i>
                                     <p>Approval</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-eye"></i>
-                                    <p>Monitoring</p>
                                 </a>
                             </li>
                         @endif
@@ -201,12 +195,6 @@
                             <a href="{{ route('evaluation.index') }}" class="nav-link {{ request()->routeIs('evaluation.index') ? 'active' : '' }}">
                                 <i class="nav-icon bi bi-search"></i>
                                 <p>View Evaluation</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('owner.monitoring') }}" class="nav-link {{ request()->routeIs('owner.monitoring') ? 'active' : '' }}">
-                                <i class="nav-icon bi bi-eye"></i>
-                                <p>Monitoring Details</p>
                             </a>
                         </li>
                         @endif
