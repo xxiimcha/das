@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Evaluation;
 use App\Models\EvaluationDetail;
+use App\Models\User;
+use App\Mail\EvaluationResultMail;
+use Illuminate\Support\Facades\Mail;
 
 class EvaluationController extends Controller
 {
@@ -69,6 +72,42 @@ class EvaluationController extends Controller
         $criteria = Criteria::all();
     
         return view('committee.evaluation.review', compact('schedule', 'criteria'));
+    }
+    
+    public function submitReview(Request $request, $schedule_id)
+    {
+        $validated = $request->validate([
+            'remarks' => 'nullable|string|max:1000',
+            'decision' => 'required|in:pass,fail',
+        ]);
+    
+        // Find the schedule
+        $schedule = AccreditationSchedule::findOrFail($schedule_id);
+        $schedule->status = $request->decision == 'pass' ? 'passed' : 'failed';
+        $schedule->save();
+    
+        // Find and update the evaluation record
+        $evaluation = Evaluation::where('schedule_id', $schedule_id)->first();
+        if ($evaluation) {
+            $evaluation->remarks = $request->remarks;
+            $evaluation->save();
+        }
+    
+        // Find the associated dormitory and load the owner
+        $dormitory = Dormitory::where('id', $schedule->dormitory_id)->with('owner')->first();
+        if ($dormitory) {
+            // Update dormitory status
+            $dormitory->status = $request->decision == 'pass' ? 'accredited' : 'reevaluate';
+            $dormitory->save();
+    
+            // Check if dormitory has a valid owner
+            if ($dormitory->owner) {
+                // Send email notification to the owner
+                Mail::to($dormitory->owner->email)->send(new EvaluationResultMail($dormitory, $schedule));
+            }
+        }
+    
+        return redirect()->route('evaluation.schedules')->with('success', 'Evaluation reviewed successfully, and email notification sent.');
     }
     
     public function submit(Request $request)

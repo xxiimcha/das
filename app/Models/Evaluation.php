@@ -14,7 +14,7 @@ class Evaluation extends Model
         'schedule_id',
         'evaluator_name',
         'evaluation_date',
-        'result',
+        'remarks',
     ];
 
     protected $casts = [

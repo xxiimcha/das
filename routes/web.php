@@ -73,7 +73,9 @@ Route::middleware('auth')->group(function () {
     // Evaluation Module 
     Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submit'])->name('evaluation.submit');
     Route::get('/committee/evaluation/review/{schedule_id}', [EvaluationController::class, 'review'])->name('evaluation.review');
-    
+    Route::post('/committee/evaluation/review/{schedule_id}/submit', [EvaluationController::class, 'submitReview'])
+    ->name('evaluation.review.submit');
+
     // Owner
     // Links
     Route::view('/dashboard', 'owner.dashboard')->name('owner.dashboard');
