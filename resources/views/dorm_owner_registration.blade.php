@@ -37,6 +37,20 @@
                     </div>
                 </div>
 
+                <h3 class="text-primary">Dormitory Location</h3>
+                <hr>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="dormLocation" class="form-label">Select Location on Map</label>
+                        <div id="map" style="height: 400px; border-radius: 10px;"></div>
+                        <small class="text-muted">Click on the map to select your dormitory location.</small>
+                    </div>
+                </div>
+
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+                <input type="hidden" id="formatted_address" name="formatted_address">
+
                 <!-- Dormitory Details Section -->
                 <h3 class="text-primary">Dormitory Details</h3>
                 <hr>
@@ -44,10 +58,6 @@
                     <div class="col-md-6">
                         <label for="dormName" class="form-label">Dormitory Name</label>
                         <input type="text" id="dormName" name="dorm_name" class="form-control" placeholder="Dormitory Name" required>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="dormLocation" class="form-label">Location</label>
-                        <input type="text" id="dormLocation" name="dorm_location" class="form-control" placeholder="City/Barangay" required>
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -182,4 +192,46 @@
 </div>
 
 <script src="{{ asset('js/owner_registration.js') }}"></script>
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var map = L.map('map').setView([14.5995, 120.9842], 12); // Default to Manila, adjust as needed
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var marker;
+
+        // Function to update hidden input fields
+        function updateLocation(lat, lng) {
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lng;
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.display_name;
+                    document.getElementById('formatted_address').value = address;
+                })
+                .catch(error => console.error("Error fetching address:", error));
+        }
+
+        // Click event to place a marker
+        map.on('click', function (e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+            updateLocation(e.latlng.lat, e.latlng.lng);
+        });
+    });
+</script>
+
 @endsection

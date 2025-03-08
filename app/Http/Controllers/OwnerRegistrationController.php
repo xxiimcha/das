@@ -18,13 +18,15 @@ class OwnerRegistrationController extends Controller
 {
     public function store(Request $request)
     {
+        // Validate the input data
         $validated = $request->validate([
             'owner_name' => 'required|string|max:255',
             'owner_email' => 'required|email|unique:users,email|max:255',
             'owner_phone' => 'required|string|max:15',
-            'owner_address' => 'required|string|max:255',
+            'latitude' => 'required|numeric',  // Ensure latitude is a valid number
+            'longitude' => 'required|numeric', // Ensure longitude is a valid number
+            'formatted_address' => 'required|string|max:500',
             'dorm_name' => 'required|string|max:255',
-            'dorm_location' => 'required|string|max:255',
             'price_range' => 'required|string|max:50',
             'dorm_capacity' => 'required|integer|min:1',
             'dorm_description' => 'required|string',
@@ -32,44 +34,43 @@ class OwnerRegistrationController extends Controller
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'permits.*' => 'nullable|file|max:5120',
         ]);
-
+    
         try {
             DB::beginTransaction();
-
-            // Generate the default password
+    
+            // Generate a secure random password
             $plaintextPassword = 'password123'; // Default password
             $hashedPassword = Hash::make($plaintextPassword);
-
-            // Prepare the user data
-            $userData = [
+    
+            // Create the user (Dorm Owner)
+            $user = User::create([
                 'name' => $validated['owner_name'],
                 'email' => $validated['owner_email'],
-                'password' => $hashedPassword, // Explicitly use the hashed password
+                'password' => $hashedPassword,
                 'role' => 'owner',
-                'status' => 'pending', // Default status
-            ];
-
-            Log::info('Final user data being inserted', $userData);
-
-            // Save the user and log the saved record
-            $user = User::create($userData);
-
-            Log::info('User record after saving', [
-                'user_id' => $user->id,
-                'hashed_password_in_db' => $user->password,
+                'status' => 'pending',
             ]);
-
-            // Create dormitory and related data
+    
+            Log::info('New dorm owner registered', ['user_id' => $user->id]);
+    
+            // Store location as "latitude,longitude"
+            $location = $validated['latitude'] . ',' . $validated['longitude'];
+    
+            // Create the dormitory
             $dormitory = Dormitory::create([
                 'user_id' => $user->id,
                 'name' => $validated['dorm_name'],
-                'location' => $validated['dorm_location'],
+                'location' => $location,  // Store combined lat,long
+                'formatted_address' => $validated['formatted_address'],
                 'price_range' => $validated['price_range'],
                 'capacity' => $validated['dorm_capacity'],
                 'description' => $validated['dorm_description'],
                 'status' => 'pending',
             ]);
-
+    
+            Log::info('Dormitory created', ['dormitory_id' => $dormitory->id]);
+    
+            // Store amenities
             foreach ($validated['amenities'] as $index => $amenity) {
                 Amenity::create([
                     'dormitory_id' => $dormitory->id,
@@ -77,7 +78,10 @@ class OwnerRegistrationController extends Controller
                     'icon' => $request->input("amenity_icons.$index", null),
                 ]);
             }
-
+    
+            Log::info('Amenities added', ['dormitory_id' => $dormitory->id]);
+    
+            // Store dormitory images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('public/dorm_images');
@@ -87,7 +91,8 @@ class OwnerRegistrationController extends Controller
                     ]);
                 }
             }
-
+    
+            // Store permits/documents
             if ($request->hasFile('permits')) {
                 foreach ($request->file('permits') as $permit) {
                     $path = $permit->store('public/dorm_documents');
@@ -97,23 +102,30 @@ class OwnerRegistrationController extends Controller
                     ]);
                 }
             }
-
+    
             DB::commit();
-
-            // Send Email
-            $details = [
+    
+            // Send Email Notification with Login Credentials
+            Mail::to($validated['owner_email'])->send(new OwnerRegistrationMail([
                 'name' => $validated['owner_name'],
                 'email' => $validated['owner_email'],
-                'password' => $plaintextPassword, // Send the plain password for reference
-            ];
-
-            Mail::to($validated['owner_email'])->send(new OwnerRegistrationMail($details));
-
-            return response()->json(['success' => true, 'message' => 'Registration successful!']);
+                'password' => $plaintextPassword, // Send the plain password
+            ]));
+    
+            Log::info('Registration email sent', ['email' => $validated['owner_email']]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful! A confirmation email has been sent.',
+            ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Owner Registration Error: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'An unexpected error occurred. Please try again later.'], 500);
+            Log::error('Owner Registration Error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+    
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected error occurred. Please try again later.',
+            ], 500);
         }
-    }
+    }    
 }
