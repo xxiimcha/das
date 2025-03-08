@@ -23,19 +23,15 @@
         </div>
         <div class="row">
             <div class="col-md-6">
-                <strong>Location:</strong>
-                <p>{{ $dormitory->location }}</p>
+                <strong>Price Range:</strong>
+                <p>₱{{ $dormitory->price_range }}</p>
             </div>
             <div class="col-md-6">
-                <strong>Price Range:</strong>
-                <p>{{ $dormitory->price_range }}</p>
+                <strong>Capacity:</strong>
+                <p>{{ $dormitory->capacity }} occupants</p>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6">
-                <strong>Capacity:</strong>
-                <p>{{ $dormitory->capacity }}</p>
-            </div>
             <div class="col-md-6">
                 <strong>Status:</strong>
                 <p>{{ ucfirst($dormitory->status) }}</p>
@@ -45,24 +41,28 @@
                 @endif
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <strong>Description:</strong>
-                <p>{{ $dormitory->description }}</p>
-            </div>
-        </div>
+
         <hr>
+
+        <!-- Dormitory Location on Map -->
+        <h4 class="text-danger mt-4">Location</h4>
+        <div id="map" style="height: 400px; border-radius: 10px; margin-bottom: 20px;"></div>
+
+        <hr>
+
         <div class="row">
             <div class="col-md-12">
                 <h4>Amenities:</h4>
                 <ul>
                     @foreach ($dormitory->amenities as $amenity)
-                        <li>{{ $amenity->name }} <i class="{{ $amenity->icon }}"></i></li>
+                        <li><i class="{{ $amenity->icon }} text-danger"></i> {{ $amenity->name }}</li>
                     @endforeach
                 </ul>
             </div>
         </div>
+
         <hr>
+
         <div class="row">
             <div class="col-md-12">
                 <h4>Images:</h4>
@@ -73,7 +73,9 @@
                 </div>
             </div>
         </div>
+
         <hr>
+
         <div class="row">
             <div class="col-md-12">
                 <h4>Documents:</h4>
@@ -104,19 +106,15 @@
                         @forelse ($dormitory->accreditationSchedules ?? [] as $schedule)
                             @forelse ($schedule->evaluations ?? [] as $evaluation)
                             <tr>
-                                <td>{{ $evaluation->evaluation_date ? \Carbon\Carbon::parse($evaluation->evaluation_date)->format('M d, Y') : 'N/A' }}</td>
+                                <td>{{ \Carbon\Carbon::parse($evaluation->evaluation_date)->format('M d, Y') ?? 'N/A' }}</td>
                                 <td>{{ $evaluation->evaluator_name ?? 'Unknown' }}</td>
                                 <td>{{ $evaluation->schedule->status ?? 'Pending' }}</td>
                                 <td>
-                                    <!-- View Button to Open Modal -->
-                                    <button class="btn btn-info btn-sm view-evaluation-btn" 
+                                    <button class="btn btn-info btn-sm view-evaluation-btn"
                                             data-id="{{ $evaluation->id }}"
                                             data-date="{{ $evaluation->evaluation_date }}"
                                             data-evaluator="{{ $evaluation->evaluator_name }}"
-                                            data-result="{{ $evaluation->schedule->status ?? 'Pending' }}"
-                                            data-criteria="{{ json_encode($evaluation->details->map(function($detail) { 
-                                                return ['criteria_name' => $detail->criteria->criteria_name ?? 'Unknown', 'rating' => $detail->rating]; 
-                                            })) }}">
+                                            data-result="{{ $evaluation->schedule->status ?? 'Pending' }}">
                                         <i class="fas fa-eye"></i> View
                                     </button>
                                 </td>
@@ -230,6 +228,24 @@
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", function() {
+    const locationString = "{{ $dormitory->location }}";
+    const [latitude, longitude] = locationString.split(',').map(parseFloat);
+
+    // Initialize Leaflet map
+    var map = L.map('map').setView([latitude, longitude], 15);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add marker
+    L.marker([latitude, longitude]).addTo(map)
+        .bindPopup("<strong>{{ $dormitory->name }}</strong><br>{{ $dormitory->formatted_address }}")
+        .openPopup();
+});
+
 document.addEventListener("DOMContentLoaded", function() {
     const viewButtons = document.querySelectorAll(".view-evaluation-btn");
 
