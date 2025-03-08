@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Dormitory;
 use App\Models\AccreditationSchedule;
+use Illuminate\Support\Facades\Log;
 use App\Models\Criteria;
 use App\Models\CriteriaColumn;
 use Illuminate\Http\Request;
@@ -61,15 +62,19 @@ class EvaluationController extends Controller
 
     public function review($schedule_id)
     {
+        // Fetch the schedule with evaluations
         $schedule = AccreditationSchedule::with('evaluations.criteria')->findOrFail($schedule_id);
-
-        return view('evaluation.review', compact('schedule'));
+    
+        // Fetch all criteria separately
+        $criteria = Criteria::all();
+    
+        return view('committee.evaluation.review', compact('schedule', 'criteria'));
     }
-
+    
     public function submit(Request $request)
     {
         // Debugging: Log request data
-        \Log::info('Received Request:', $request->all());
+        Log::info('Received Request:', $request->all());
     
         // Validate the incoming request data.
         $validated = $request->validate([
@@ -81,7 +86,7 @@ class EvaluationController extends Controller
         ]);
     
         // Debugging: Log validated data
-        \Log::info('Validated Data:', $validated);
+        Log::info('Validated Data:', $validated);
     
         try {
             // Create the evaluation record.
@@ -92,7 +97,7 @@ class EvaluationController extends Controller
             ]);
     
             // Debugging: Log evaluation insert
-            \Log::info('Evaluation Inserted:', $evaluation->toArray());
+            Log::info('Evaluation Inserted:', $evaluation->toArray());
     
             // Save each criteria rating.
             foreach ($validated['criteria'] as $criteriaId => $data) {
@@ -103,7 +108,7 @@ class EvaluationController extends Controller
                 ]);
     
                 // Debugging: Log criteria insert
-                \Log::info('Criteria Inserted:', [
+                Log::info('Criteria Inserted:', [
                     'evaluation_id' => $evaluation->id,
                     'criteria_id'   => $criteriaId,
                     'rating'        => $data['rating'],
@@ -115,7 +120,7 @@ class EvaluationController extends Controller
             if ($accreditationSchedule) {
                 $accreditationSchedule->status = 'for review';
                 $accreditationSchedule->save();
-                \Log::info("Accreditation schedule ID {$validated['schedule_id']} updated to 'for review'.");
+                Log::info("Accreditation schedule ID {$validated['schedule_id']} updated to 'for review'.");
             }
     
             // Update the related dormitory status to "under review"
@@ -124,7 +129,7 @@ class EvaluationController extends Controller
                 if ($dormitory) {
                     $dormitory->status = 'under review';
                     $dormitory->save();
-                    \Log::info("Dormitory ID {$dormitory->id} updated to 'under review'.");
+                    Log::info("Dormitory ID {$dormitory->id} updated to 'under review'.");
                 }
             }
     
@@ -132,7 +137,7 @@ class EvaluationController extends Controller
             return redirect()->route('evaluation.schedules')->with('success', 'Evaluation submitted successfully.');
     
         } catch (\Exception $e) {
-            \Log::error('Error inserting evaluation: ' . $e->getMessage());
+            Log::error('Error inserting evaluation: ' . $e->getMessage());
     
             // Redirect back with an error message
             return redirect()->back()->withErrors(['error' => 'Error saving evaluation. Please try again.']);

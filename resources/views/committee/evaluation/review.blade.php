@@ -10,20 +10,33 @@
     <div class="card-body">
         <h5><strong>Dormitory: </strong> {{ $schedule->dormitory->name ?? 'N/A' }}</h5>
         <p><strong>Status:</strong> {{ ucfirst($schedule->status) }}</p>
-
         <table class="table table-bordered mt-3 text-center">
             <thead class="bg-danger text-white">
                 <tr>
                     <th>Criteria</th>
+                    @php
+                        $maxValues = $schedule->evaluations->flatMap->criteria->map(fn($c) => count((array)$c->values))->max();
+                    @endphp
+                    @for ($i = 1; $i <= $maxValues; $i++)
+                        <th>Value {{ $i }}</th>
+                    @endfor
                     <th>Rating</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($schedule->evaluations as $evaluation)
-                <tr>
-                    <td>{{ $evaluation->criteria->criteria_name ?? 'N/A' }}</td>
-                    <td>{{ $evaluation->rating ?? 'N/A' }}</td>
-                </tr>
+                    @foreach ($evaluation->criteria as $criterion)
+                        <tr>
+                            <td>{{ $criterion->criteria_name }}</td>
+                            @php
+                                $values = is_array($criterion->values) ? $criterion->values : json_decode($criterion->values, true);
+                            @endphp
+                            @for ($i = 0; $i < $maxValues; $i++)
+                                <td>{{ $values[$i] ?? 'N/A' }}</td>
+                            @endfor>
+                            <td>{{ $criterion->pivot->rating ?? 'N/A' }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
             </tbody>
         </table>

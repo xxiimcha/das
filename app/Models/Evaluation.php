@@ -31,9 +31,10 @@ class Evaluation extends Model
         return $this->hasMany(EvaluationDetail::class, 'evaluation_id');
     }
 
-
     public function criteria()
     {
-        return $this->hasMany(Criteria::class);
+        return $this->belongsToMany(Criteria::class, 'evaluation_details', 'evaluation_id', 'criteria_id')
+                    ->withPivot('rating'); // Assuming there's a rating column
     }
+
 }
