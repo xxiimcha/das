@@ -54,11 +54,11 @@
                 </div>
 
                 <!-- Create Account Link -->
-                <div class="text-center mt-3">
+                <!-- <div class="text-center mt-3">
                     <p class="small">
                         Don't have an account? <a href="{{ route('auth.register.form') }}" class="text-danger no-underline">Create Account</a>
                     </p>
-                </div>
+                </div>-->
 
                 <!-- Error Message -->
                 @if (session('error'))
