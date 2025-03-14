@@ -96,4 +96,13 @@ class CommitteeCriteriaController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function toggleStatus(Request $request)
+    {
+        $criteria = Criteria::findOrFail($request->id);
+        $criteria->status = $request->status;
+        $criteria->save();
+
+        return response()->json(['success' => true, 'status' => $criteria->status]);
+    }
+
 }

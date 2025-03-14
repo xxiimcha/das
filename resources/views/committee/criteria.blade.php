@@ -27,11 +27,12 @@
         <table id="criteriaTable" class="table table-bordered text-center align-middle">
             <thead class="bg-danger text-white">
                 <tr id="criteriaHeaders">
-                    <th contenteditable="true">Criteria</th>
+                    <th>Criteria</th>
                     @foreach ($columns as $column)
-                        <th contenteditable="true">{{ $column->name }}</th>
+                        <th>{{ $column->name }}</th>
                     @endforeach
-                    <th>Action</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="criteriaBody">
@@ -42,6 +43,14 @@
                             <td contenteditable="true">{{ $value }}</td>
                         @endforeach
                         <td>
+                            <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-danger' }}">
+                                {{ ucfirst($item->status) }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning btn-sm toggleStatus" data-id="{{ $item->id }}" data-status="{{ $item->status }}">
+                                <i class="fas {{ $item->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
+                            </button>
                             <button class="btn btn-danger btn-sm deleteRow">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -64,62 +73,59 @@
                         <td contenteditable="true">New Description</td>
                     @endforeach
                     <td>
+                        <span class="badge bg-danger">Inactive</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-warning btn-sm toggleStatus" data-status="inactive">
+                            <i class="fas fa-toggle-off"></i>
+                        </button>
                         <button class="btn btn-danger btn-sm deleteRow"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>`;
             $('#criteriaTable tbody').append(newRow);
-
-            // Send an AJAX request to save the new row in the database
-            $.ajax({
-                url: '{{ route("criteria.row.add") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    criteria_name: 'New Criteria',
-                    values: Array.from({ length: {{ count($columns) }} }, () => 'New Description'),
-                },
-                success: function (response) {
-                    console.log('Row added successfully:', response);
-                },
-                error: function (error) {
-                    console.error('Error adding row:', error);
-                },
-            });
         });
 
-        // Add a new column
-        $('#addColumn').on('click', function () {
-            const newHeader = `<th contenteditable="true">New Column</th>`;
-            $('#criteriaTable thead tr th:last').before(newHeader);
+        // Toggle Activate/Deactivate
+        $(document).on('click', '.toggleStatus', function () {
+            const button = $(this);
+            const row = button.closest('tr');
+            const criteriaId = row.data('id');
+            let currentStatus = button.data('status');
 
-            $('#criteriaTable tbody tr').each(function () {
-                const newCell = `<td contenteditable="true">New Cell</td>`;
-                $(this).find('td:last').before(newCell);
-            });
+            // Toggle status
+            let newStatus = currentStatus === 'active' ? 'inactive' : 'active';
 
-            // Send an AJAX request to save the new column in the database
+            // Send AJAX request to update the status
             $.ajax({
-                url: '{{ route("criteria.column.add") }}',
+                url: '{{ route("criteria.toggle.status") }}',
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    column_name: 'New Column',
+                    id: criteriaId,
+                    status: newStatus
                 },
                 success: function (response) {
-                    console.log('Column added successfully:', response);
+                    console.log('Status updated:', response);
+                    button.data('status', newStatus);
+
+                    // Update button icon and badge
+                    button.find('i').toggleClass('fa-toggle-on fa-toggle-off');
+                    const statusBadge = row.find('.badge');
+                    statusBadge.text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1))
+                               .toggleClass('bg-success bg-danger');
                 },
                 error: function (error) {
-                    console.error('Error adding column:', error);
-                },
+                    console.error('Error updating status:', error);
+                }
             });
         });
 
         // Remove a row
         $(document).on('click', '.deleteRow', function () {
             const row = $(this).closest('tr');
-            const criteriaId = row.data('id'); // Get the id from the data-id attribute
+            const criteriaId = row.data('id'); 
 
-            // Send an AJAX request to delete the row from the database
+            // Send AJAX request to delete the row
             $.ajax({
                 url: '{{ route("criteria.row.delete", ":id") }}'.replace(':id', criteriaId),
                 method: 'DELETE',
@@ -127,8 +133,8 @@
                     _token: '{{ csrf_token() }}',
                 },
                 success: function (response) {
-                    console.log('Row deleted successfully:', response);
-                    row.remove(); // Remove the row from the table on success
+                    console.log('Row deleted:', response);
+                    row.remove();
                 },
                 error: function (error) {
                     console.error('Error deleting row:', error);
@@ -141,9 +147,8 @@
             const cell = $(this);
             const row = cell.closest('tr');
             const columnIndex = cell.index();
-            const criteriaId = row.data('id'); // Assuming rows have a data-id attribute
+            const criteriaId = row.data('id');
 
-            // Send an AJAX request to update the cell value in the database
             $.ajax({
                 url: '{{ route("criteria.row.update") }}',
                 method: 'POST',
@@ -154,7 +159,7 @@
                     value: cell.text(),
                 },
                 success: function (response) {
-                    console.log('Cell updated successfully:', response);
+                    console.log('Cell updated:', response);
                 },
                 error: function (error) {
                     console.error('Error updating cell:', error);
