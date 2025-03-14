@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Criteria extends Model
 {
-    protected $fillable = ['criteria_name', 'values'];
+    protected $fillable = ['criteria_name', 'values', 'status'];
 
     protected $casts = [
         'values' => 'array',

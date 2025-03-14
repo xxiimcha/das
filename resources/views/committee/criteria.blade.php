@@ -25,39 +25,40 @@
     </div>
     <div class="card-body table-responsive">
         <table id="criteriaTable" class="table table-bordered text-center align-middle">
-            <thead class="bg-danger text-white">
-                <tr id="criteriaHeaders">
-                    <th>Criteria</th>
-                    @foreach ($columns as $column)
-                        <th>{{ $column->name }}</th>
-                    @endforeach
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="criteriaBody">
-                @foreach ($criteria as $item)
-                    <tr data-id="{{ $item->id }}">
-                        <td contenteditable="true">{{ $item->criteria_name }}</td>
-                        @foreach ($item->values as $value)
-                            <td contenteditable="true">{{ $value }}</td>
-                        @endforeach
-                        <td>
-                            <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-danger' }}">
-                                {{ ucfirst($item->status) }}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-warning btn-sm toggleStatus" data-id="{{ $item->id }}" data-status="{{ $item->status }}">
-                                <i class="fas {{ $item->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm deleteRow">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
+        <thead class="bg-danger text-white">
+    <tr>
+        <th>Criteria</th>
+        @foreach ($columns as $column)
+            <th>{{ $column->name }}</th>
+        @endforeach
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+</thead>
+<tbody>
+    @foreach ($criteria as $item)
+    <tr data-id="{{ $item->id }}">
+        <td contenteditable="true">{{ $item->criteria_name }}</td>
+        @foreach ($item->values as $value)
+            <td contenteditable="true">{{ $value }}</td>
+        @endforeach
+        <td>
+            <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-danger' }}">
+                {{ ucfirst($item->status) }}
+            </span>
+        </td>
+        <td>
+            <button class="btn btn-warning btn-sm toggleStatus" data-id="{{ $item->id }}" data-status="{{ $item->status }}">
+                <i class="fas {{ $item->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
+            </button>
+            <button class="btn btn-danger btn-sm deleteRow">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+    @endforeach
+</tbody>
+
         </table>
     </div>
 </div>

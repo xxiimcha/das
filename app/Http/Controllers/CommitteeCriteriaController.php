@@ -13,25 +13,21 @@ class CommitteeCriteriaController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
-    {
-        // Fetch columns from criteria_columns
-        $columns = CriteriaColumn::select('id', 'name')->get();
-
-        // Fetch criteria from criterias
-        $criteria = Criteria::select('id', 'criteria_name', 'values')->get();
-
-        // Decode JSON values in the 'values' column only if it's a string
-        $criteria->map(function ($item) {
-            if (is_string($item->values)) {
-                $item->values = json_decode($item->values, true);
-            }
-            return $item;
-        });
-
-        // Pass the data to the Blade view
-        return view('committee.criteria', compact('columns', 'criteria'));
-    }
+    
+     public function index()
+     {
+         $columns = CriteriaColumn::select('id', 'name')->get();
+         $criteria = Criteria::select('id', 'criteria_name', 'values', 'status')->get();
+ 
+         $criteria->map(function ($item) {
+             if (is_string($item->values)) {
+                 $item->values = json_decode($item->values, true);
+             }
+             return $item;
+         });
+ 
+         return view('committee.criteria', compact('columns', 'criteria'));
+     }
 
     public function addRow(Request $request)
     {
