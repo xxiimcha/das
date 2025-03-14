@@ -32,6 +32,8 @@
                     <th>Name</th>
                     <th>Owner</th>
                     <th>Status</th>
+                    <th>Evaluation Date</th>
+                    <th>Accreditation Date</th>
                     <th>Created At</th>
                     <th>Actions</th>
                 </tr>
@@ -47,6 +49,8 @@
                             {{ ucfirst($dormitory->status) }}
                         </span>
                     </td>
+                    <td>{{ optional($dormitory->updated_at)->format('M d, Y') }}</td>
+                    <td>{{ optional($dormitory->updated_at)->format('M d, Y') }}</td>
                     <td>{{ $dormitory->created_at->format('M d, Y') }}</td>
                     <td>
                         <a href="{{ route('committee.dormitories.show', $dormitory->id) }}" class="btn btn-primary btn-sm">
@@ -86,7 +90,18 @@
     </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script>
+    $(document).ready(function () {
+        $('#dormitoriesTable').DataTable({
+            "order": [[4, "desc"]],
+            "columnDefs": [
+                { "orderable": false, "targets": [7] } // Disable sorting on Actions column
+            ]
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const deleteDormitoryBtns = document.querySelectorAll('.delete-dormitory-btn');
 
@@ -99,4 +114,5 @@
         });
     });
 </script>
+
 @endsection
