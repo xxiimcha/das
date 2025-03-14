@@ -49,8 +49,12 @@
                             {{ ucfirst($dormitory->status) }}
                         </span>
                     </td>
-                    <td>{{ optional($dormitory->updated_at)->format('M d, Y') }}</td>
-                    <td>{{ optional($dormitory->updated_at)->format('M d, Y') }}</td>
+                    <td>
+                        {{ optional($dormitory->accreditationSchedules->last())->evaluation_date ? \Carbon\Carbon::parse($dormitory->accreditationSchedules->last()->evaluation_date)->format('M d, Y') : 'N/A' }}
+                    </td>
+                    <td>
+                        {{ optional($dormitory->accreditationSchedules->last())->updated_at ? \Carbon\Carbon::parse($dormitory->accreditationSchedules->last()->updated_at)->format('M d, Y') : 'N/A' }}
+                    </td>
                     <td>{{ $dormitory->created_at->format('M d, Y') }}</td>
                     <td>
                         <a href="{{ route('committee.dormitories.show', $dormitory->id) }}" class="btn btn-primary btn-sm">
