@@ -36,15 +36,16 @@ class CommitteeDormitoryController extends Controller
             'amenities',
             'images',
             'documents',
-            'accreditationSchedules.evaluations.details.criteria'
+            'accreditationSchedules.evaluations.details.criteria' // Ensure criteria is included
         ])->findOrFail($id);
 
-        // Get the latest accreditation schedule for status
+        // Get latest accreditation schedule for status
         $schedule = $dormitory->accreditationSchedules->last();
         $status = $schedule ? $schedule->status : 'N/A';
 
         return view('committee.show-dormitory', compact('dormitory', 'status'));
     }
+
 
     /**
      * Store a newly created dormitory in storage.

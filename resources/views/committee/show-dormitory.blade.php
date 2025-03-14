@@ -110,13 +110,20 @@
                                 <td>{{ $evaluation->evaluator_name ?? 'Unknown' }}</td>
                                 <td>{{ $evaluation->schedule->status ?? 'Pending' }}</td>
                                 <td>
-                                    <button class="btn btn-info btn-sm view-evaluation-btn"
-                                            data-id="{{ $evaluation->id }}"
-                                            data-date="{{ $evaluation->evaluation_date }}"
-                                            data-evaluator="{{ $evaluation->evaluator_name }}"
-                                            data-result="{{ $evaluation->schedule->status ?? 'Pending' }}">
-                                        <i class="fas fa-eye"></i> View
-                                    </button>
+                                <button class="btn btn-info btn-sm view-evaluation-btn"
+                                    data-id="{{ $evaluation->id }}"
+                                    data-date="{{ $evaluation->evaluation_date }}"
+                                    data-evaluator="{{ $evaluation->evaluator_name }}"
+                                    data-result="{{ $evaluation->schedule->status ?? 'Pending' }}"
+                                    data-remarks="{{ $evaluation->remarks ?? 'No remarks available' }}"
+                                    data-criteria='@json($evaluation->details->map(function($detail) {
+                                        return [
+                                            "criteria_name" => $detail->criteria->criteria_name ?? "N/A", // FIXED
+                                            "rating" => $detail->rating
+                                        ];
+                                    }))'>
+                                    <i class="fas fa-eye"></i> View
+                                </button>
                                 </td>
                             </tr>
                             @empty
@@ -251,54 +258,63 @@ document.addEventListener("DOMContentLoaded", function() {
 
     viewButtons.forEach(button => {
         button.addEventListener("click", function() {
-            const evaluationDate = button.getAttribute("data-date") || "N/A";
-            const evaluatorName = button.getAttribute("data-evaluator") || "Unknown";
-            const evaluationResult = button.getAttribute("data-result") || "Pending";
-            const remarks = button.getAttribute("data-remarks") || "No remarks available";
-            const criteriaData = button.getAttribute("data-criteria");
-
-            let parsedCriteria = [];
             try {
-                parsedCriteria = JSON.parse(criteriaData);
-                if (!Array.isArray(parsedCriteria)) {
+                const evaluationDate = button.getAttribute("data-date") || "N/A";
+                const evaluatorName = button.getAttribute("data-evaluator") || "Unknown";
+                const evaluationResult = button.getAttribute("data-result") || "Pending";
+                const remarks = button.getAttribute("data-remarks") || "No remarks available";
+                const criteriaData = button.getAttribute("data-criteria") || "[]"; // Ensure default empty array string
+
+                let parsedCriteria = [];
+                try {
+                    parsedCriteria = JSON.parse(criteriaData);
+                    if (!Array.isArray(parsedCriteria)) {
+                        throw new Error("Invalid criteria format: Expected an array");
+                    }
+                } catch (error) {
+                    console.error("Error parsing criteria data:", error);
                     parsedCriteria = [];
                 }
+
+                // Populate modal fields
+                document.getElementById("modal-evaluation-date").textContent = evaluationDate;
+                document.getElementById("modal-evaluator-name").textContent = evaluatorName;
+                document.getElementById("modal-remarks").value = remarks;
+
+                // Apply badge color based on evaluation result
+                const resultBadge = document.getElementById("modal-evaluation-result");
+                resultBadge.textContent = evaluationResult;
+                resultBadge.className = "badge " + 
+                    (evaluationResult.toLowerCase() === "pass" ? "bg-success" :
+                    evaluationResult.toLowerCase() === "fail" ? "bg-danger" :
+                    "bg-secondary");
+
+                // Populate Criteria Table
+                const criteriaTableBody = document.getElementById("modal-criteria-body");
+                criteriaTableBody.innerHTML = ""; // Clear previous content
+
+                if (parsedCriteria.length > 0) {
+                    parsedCriteria.forEach(criteria => {
+                        let row = `<tr>
+                            <td>${criteria.criteria_name || "N/A"}</td>
+                            <td>${criteria.rating || "N/A"}</td>
+                        </tr>`;
+                        criteriaTableBody.innerHTML += row;
+                    });
+                } else {
+                    criteriaTableBody.innerHTML = `<tr><td colspan="2" class="text-center">No criteria available</td></tr>`;
+                }
+
+                // Show Modal
+                new bootstrap.Modal(document.getElementById("evaluationModal")).show();
+
             } catch (error) {
-                console.error("Error parsing criteria data:", error);
+                console.error("Error handling evaluation modal:", error);
+                alert("An error occurred while loading evaluation details.");
             }
-
-            // Populate modal fields
-            document.getElementById("modal-evaluation-date").textContent = evaluationDate;
-            document.getElementById("modal-evaluator-name").textContent = evaluatorName;
-            document.getElementById("modal-evaluation-result").textContent = evaluationResult;
-            document.getElementById("modal-remarks").value = remarks;
-
-            // Add badge color for evaluation result
-            const resultBadge = document.getElementById("modal-evaluation-result");
-            resultBadge.className = "badge " + 
-                (evaluationResult === "Pass" ? "bg-success" : 
-                (evaluationResult === "Fail" ? "bg-danger" : "bg-secondary"));
-
-            // Populate Criteria Table
-            let criteriaTableBody = document.getElementById("modal-criteria-body");
-            criteriaTableBody.innerHTML = "";
-
-            if (parsedCriteria.length > 0) {
-                parsedCriteria.forEach(criteria => {
-                    let row = `<tr>
-                        <td>${criteria.criteria_name || "N/A"}</td>
-                        <td>${criteria.rating || "N/A"}</td>
-                    </tr>`;
-                    criteriaTableBody.innerHTML += row;
-                });
-            } else {
-                criteriaTableBody.innerHTML = `<tr><td colspan="2" class="text-center">No criteria available</td></tr>`;
-            }
-
-            // Show Modal
-            new bootstrap.Modal(document.getElementById("evaluationModal")).show();
         });
     });
 });
+
 </script>
 @endsection
