@@ -160,7 +160,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger">Upload File</button>
+                <button type="submit" class="btn btn-danger" id="importSubmitBtn">Upload File</button>
             </div>
         </form>
     </div>
@@ -176,13 +176,23 @@
             columnDefs: [{ orderable: false, targets: [7] }]
         });
 
+        // Delete action binding
         document.querySelectorAll('.delete-dormitory-btn').forEach(button => {
             button.addEventListener('click', function () {
                 const dormitoryId = button.getAttribute('data-id');
                 document.getElementById('deleteDormitoryForm').action = `/committee/dormitories/${dormitoryId}`;
             });
         });
+
+        // Optional: show spinner on import form submit
+        const importForm = document.querySelector('#importModal form');
+        importForm.addEventListener('submit', function () {
+            const btn = document.getElementById('importSubmitBtn');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
+            btn.disabled = true;
+        });
     });
 </script>
+
 @endpush
 @endsection

@@ -5,29 +5,32 @@ namespace App\Imports;
 use App\Models\Dormitory;
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class DormitoriesImport implements ToCollection
+
+class DormitoriesImport implements ToModel, WithHeadingRow
 {
-    public function collection(Collection $rows)
+    public function model(array $row)
     {
-        // Skip header row
-        $rows->shift();
+        $user = User::firstOrCreate(
+            ['name' => $row['owner']],
+            [
+                'email' => $row['email'],
+                'password' => bcrypt('password'),
+                'role' => 'owner',
+            ]
+        );
 
-        foreach ($rows as $row) {
-            $owner = User::firstOrCreate(
-                ['email' => $row[3]],
-                ['name' => $row[1], 'contact_number' => $row[2], 'address' => $row[5], 'role' => 'owner', 'password' => bcrypt('default123')]
-            );
-
-            Dormitory::create([
-                'user_id' => $owner->id,
-                'name' => $row[0],
-                'location' => $row[4],
-                'price_range' => '0', // default
-                'capacity' => 0, // default
-                'status' => 'pending',
-            ]);
-        }
+        return new Dormitory([
+            'user_id' => $user->id,
+            'name' => $row['dorm_name'],
+            'contact_number' => $row['contact_number'],
+            'email' => $row['email'],
+            'location' => $row['dorm_location'],
+            'owner_address' => $row["owner's_address"],
+            'status' => 'pending',
+        ]);
     }
 }
+

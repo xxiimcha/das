@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
     // Admin Modules
     Route::get('/dormitories/create', [AdminDormController::class, 'create'])->name('dormitories.create');
     Route::post('/dormitories/import', [AdminDormController::class, 'import'])->name('dormitories.import');
+    Route::post('/admin/dormitories/import', [AdminDormController::class, 'import'])->name('dormitories.import');
 
     Route::get('/committee/dormitories', [CommitteeDormitoryController::class, 'index'])->name('committee.dormitories');
     Route::post('/committee/dormitories', [CommitteeDormitoryController::class, 'store'])->name('committee.dormitories.store');
