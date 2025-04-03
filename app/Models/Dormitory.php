@@ -10,9 +10,13 @@ class Dormitory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', // Changed to user_id to match the migration
+        'user_id',
         'name',
         'location',
+        'formatted_address',
+        'contact_number',
+        'email',
+        'owner_address',
         'price_range',
         'capacity',
         'description',
@@ -43,5 +47,4 @@ class Dormitory extends Model
     {
         return $this->hasMany(AccreditationSchedule::class, 'dormitory_id');
     }
-
 }

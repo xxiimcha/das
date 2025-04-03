@@ -11,9 +11,10 @@ use App\Http\Controllers\CommitteeDashboardController;
 use App\Http\Controllers\CommitteeCriteriaController;
 use App\Http\Controllers\CommitteeEvaluationController;
 
+use App\Http\Controllers\AdminDormController;
+
 use App\Http\Controllers\Owner\DormitoryController;
 use App\Http\Controllers\Owner\EvaluationController;
-
 
 use App\Http\Controllers\DormController;
 
@@ -39,6 +40,10 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
 // Admin Functionality (requires login)
 Route::middleware('auth')->group(function () {
+    // Admin Modules - Dormitories
+    Route::get('/dorm-listing', [AdminDormController::class, 'index'])->name('admin.dorm.listing');
+    Route::get('/dorm-create', [AdminDormController::class, 'create'])->name('admin.dorm.create');
+
     // Profule Route
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -55,6 +60,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/committee/dashboard', [CommitteeDashboardController::class, 'index'])->name('committee.dashboard');
 
     // Dormitories Module
+    // Admin Modules
+    Route::get('/dormitories/create', [AdminDormController::class, 'create'])->name('dormitories.create');
+    Route::post('/dormitories/import', [AdminDormController::class, 'import'])->name('dormitories.import');
+
     Route::get('/committee/dormitories', [CommitteeDormitoryController::class, 'index'])->name('committee.dormitories');
     Route::post('/committee/dormitories', [CommitteeDormitoryController::class, 'store'])->name('committee.dormitories.store');
     Route::delete('/committee/dormitories/{id}', [CommitteeDormitoryController::class, 'destroy'])->name('committee.dormitories.destroy');
@@ -69,7 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/committee/criteria/row/{id}', [CommitteeCriteriaController::class, 'deleteRow'])->name('criteria.row.delete');
     Route::post('/committee/criteria/row/update', [CommitteeCriteriaController::class, 'updateCell'])->name('criteria.row.update');
     Route::post('/committee/criteria/save', [CommitteeCriteriaController::class, 'saveChanges'])->name('criteria.save.changes');
-    Route::post('/criteria/toggle-status', [CriteriaController::class, 'toggleStatus'])->name('criteria.toggle.status');
+    Route::post('/criteria/toggle-status', [CommitteeCriteriaController::class, 'toggleStatus'])->name('criteria.toggle.status');
 
     // Evaluation Module 
     Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submit'])->name('evaluation.submit');
@@ -77,7 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/committee/evaluation/review/{schedule_id}/submit', [EvaluationController::class, 'submitReview'])
     ->name('evaluation.review.submit');
 
-    // Owner
+    // Owner 
     // Links
     Route::view('/dashboard', 'owner.dashboard')->name('owner.dashboard');
     Route::view('/inspection', 'owner.dashboard')->name('owner.inspection');
@@ -85,6 +94,7 @@ Route::middleware('auth')->group(function () {
     Route::view('/security', 'owner.security')->name('owner.security');
     Route::view('/monitoring', 'owner.monitoring')->name('owner.monitoring');
 
+    // 
     // Dormitory Module
     Route::get('dormitories', [DormitoryController::class, 'index'])->name('dormitories.index');
     Route::get('dormitories/{id}', [DormitoryController::class, 'show'])->name('dormitories.show');
