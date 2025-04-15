@@ -16,116 +16,115 @@ use App\Mail\OwnerRegistrationMail;
 
 class OwnerRegistrationController extends Controller
 {
+    public function show(Request $request)
+    {
+        $token = $request->query('token');
+        $dormId = $request->query('dorm_id');
+
+        if (!$token || !$dormId) {
+            abort(403, 'Invalid access link.');
+        }
+
+        // Get dorm with matching ID and token
+        $dorm = Dormitory::with('owner')
+            ->where('id', $dormId)
+            ->where('invitation_token', $token)
+            ->first();
+
+        if (!$dorm) {
+            abort(403, 'This link has expired or is invalid.');
+        }
+
+        return view('dorm_owner_registration', [
+            'dorm' => $dorm,
+            'owner' => $dorm->owner
+        ]);
+    }
+
     public function store(Request $request)
     {
-        // Validate the input data
         $validated = $request->validate([
-            'owner_name' => 'required|string|max:255',
-            'owner_email' => 'required|email|unique:users,email|max:255',
-            'owner_phone' => 'required|string|max:15',
-            'latitude' => 'required|numeric',  // Ensure latitude is a valid number
-            'longitude' => 'required|numeric', // Ensure longitude is a valid number
-            'formatted_address' => 'required|string|max:500',
+            'dorm_id' => 'required|exists:dormitories,id',
+            'token' => 'required|string',
             'dorm_name' => 'required|string|max:255',
             'price_range' => 'required|string|max:50',
             'dorm_capacity' => 'required|integer|min:1',
             'dorm_description' => 'required|string',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'formatted_address' => 'required|string|max:500',
             'amenities' => 'array|required',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'permits.*' => 'nullable|file|max:5120',
         ]);
-    
+
+        $dorm = Dormitory::findOrFail($validated['dorm_id']);
+
+        // Check if token matches
+        if ($dorm->invitation_token !== $validated['token']) {
+            Log::warning("Token mismatch for dorm ID {$dorm->id}. Expected: {$dorm->invitation_token}, Received: {$validated['token']}");
+            return back()->withErrors(['token' => 'Invalid or expired token.']);
+        }
+
         try {
             DB::beginTransaction();
-    
-            // Generate a secure random password
-            $plaintextPassword = 'password123'; // Default password
-            $hashedPassword = Hash::make($plaintextPassword);
-    
-            // Create the user (Dorm Owner)
-            $user = User::create([
-                'name' => $validated['owner_name'],
-                'email' => $validated['owner_email'],
-                'password' => $hashedPassword,
-                'role' => 'owner',
-                'status' => 'pending',
-            ]);
-    
-            Log::info('New dorm owner registered', ['user_id' => $user->id]);
-    
-            // Store location as "latitude,longitude"
-            $location = $validated['latitude'] . ',' . $validated['longitude'];
-    
-            // Create the dormitory
-            $dormitory = Dormitory::create([
-                'user_id' => $user->id,
+
+            // Update dormitory
+            $dorm->update([
                 'name' => $validated['dorm_name'],
-                'location' => $location,  // Store combined lat,long
+                'location' => $validated['latitude'] . ',' . $validated['longitude'],
                 'formatted_address' => $validated['formatted_address'],
                 'price_range' => $validated['price_range'],
                 'capacity' => $validated['dorm_capacity'],
                 'description' => $validated['dorm_description'],
                 'status' => 'pending',
+                'invitation_token' => null
             ]);
-    
-            Log::info('Dormitory created', ['dormitory_id' => $dormitory->id]);
-    
-            // Store amenities
+            Log::info("Dormitory #{$dorm->id} updated by owner: {$dorm->owner->email}");
+
+            // Delete old data
+            $dorm->amenities()->delete();
+            $dorm->images()->delete();
+            $dorm->documents()->delete();
+            Log::info("Old amenities, images, and documents cleared for dormitory #{$dorm->id}");
+
+            // Insert new amenities
             foreach ($validated['amenities'] as $index => $amenity) {
-                Amenity::create([
-                    'dormitory_id' => $dormitory->id,
+                $dorm->amenities()->create([
                     'name' => $amenity,
                     'icon' => $request->input("amenity_icons.$index", null),
                 ]);
             }
-    
-            Log::info('Amenities added', ['dormitory_id' => $dormitory->id]);
-    
-            // Store dormitory images
+            Log::info("Inserted " . count($validated['amenities']) . " amenities for dormitory #{$dorm->id}");
+
+            // Insert new images
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('public/dorm_images');
-                    DormitoryImage::create([
-                        'dormitory_id' => $dormitory->id,
-                        'image_path' => $path,
-                    ]);
+                    $dorm->images()->create(['image_path' => $path]);
                 }
+                Log::info("Dormitory #{$dorm->id} images uploaded.");
             }
-    
-            // Store permits/documents
+
+            // Insert new permits
             if ($request->hasFile('permits')) {
                 foreach ($request->file('permits') as $permit) {
                     $path = $permit->store('public/dorm_documents');
-                    DormitoryDocument::create([
-                        'dormitory_id' => $dormitory->id,
-                        'file_path' => $path,
-                    ]);
+                    $dorm->documents()->create(['file_path' => $path]);
                 }
+                Log::info("Dormitory #{$dorm->id} permits/documents uploaded.");
             }
-    
+
             DB::commit();
-    
-            // Send Email Notification with Login Credentials
-            Mail::to($validated['owner_email'])->send(new OwnerRegistrationMail([
-                'name' => $validated['owner_name'],
-                'email' => $validated['owner_email'],
-                'password' => $plaintextPassword, // Send the plain password
-            ]));
-    
-            Log::info('Registration email sent', ['email' => $validated['owner_email']]);
-    
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful! A confirmation email has been sent.',
-            ], 201);
+            Log::info("Dormitory #{$dorm->id} registration completed. Token invalidated.");
+
+            return redirect('/')->with('success', 'Registration completed! Awaiting approval.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Owner Registration Error', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-    
-            return response()->json([
-                'success' => false,
-                'message' => 'An unexpected error occurred. Please try again later.',
-            ], 500);
+            Log::error("Owner form update failed for dormitory #{$dorm->id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'Something went wrong. Please try again.');
         }
-    }    
+    }
 }

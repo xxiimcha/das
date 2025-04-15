@@ -13,29 +13,38 @@
             <!-- Form -->
             <form method="POST" enctype="multipart/form-data" action="{{ route('owner.register') }}" id="registrationForm">
                 @csrf
+                <!-- Hidden Inputs for Validation -->
+                <input type="hidden" name="dorm_id" value="{{ $dorm->id }}">
+                <input type="hidden" name="token" value="{{ request('token') }}">
+
                 <!-- Owner Details Section -->
                 <h3 class="text-primary">Owner Details</h3>
                 <hr>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="ownerName" class="form-label">Full Name</label>
-                        <input type="text" id="ownerName" name="owner_name" class="form-control" placeholder="John Doe" required>
+                        <input type="text" id="ownerName" name="owner_name" class="form-control" 
+                            value="{{ $owner->name ?? old('owner_name') }}" readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="ownerEmail" class="form-label">Email Address</label>
-                        <input type="email" id="ownerEmail" name="owner_email" class="form-control" placeholder="email@example.com" required>
+                        <input type="email" id="ownerEmail" name="owner_email" class="form-control" 
+                            value="{{ $owner->email ?? old('owner_email') }}" readonly>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="ownerPhone" class="form-label">Phone Number</label>
-                        <input type="text" id="ownerPhone" name="owner_phone" class="form-control" placeholder="09xxxxxxxxx" required>
+                        <input type="text" id="ownerPhone" name="owner_phone" class="form-control" 
+                            value="{{ $owner->contact_number ?? old('owner_phone') }}" readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="ownerAddress" class="form-label">Address</label>
-                        <input type="text" id="ownerAddress" name="owner_address" class="form-control" placeholder="123 Street, City" required>
+                        <input type="text" id="ownerAddress" name="owner_address" class="form-control" 
+                            value="{{ $owner->owner_address ?? old('owner_address') }}" readonly>
                     </div>
                 </div>
+
 
                 <h3 class="text-primary">Dormitory Location</h3>
                 <hr>
@@ -57,7 +66,7 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="dormName" class="form-label">Dormitory Name</label>
-                        <input type="text" id="dormName" name="dorm_name" class="form-control" placeholder="Dormitory Name" required>
+                        <input type="text" id="dormName" name="dorm_name" class="form-control" value="{{ $dorm->name ?? old('dorm_name') }}" readonly>
                     </div>
                 </div>
                 <div class="row mb-3">

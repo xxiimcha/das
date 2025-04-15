@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use App\Models\AccreditationSchedule;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DormitoryStatusChanged;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use App\Mail\DormitoryInvitation;
 
 class CommitteeDormitoryController extends Controller
 {
@@ -18,12 +21,22 @@ class CommitteeDormitoryController extends Controller
      */
     public function index()
     {
-        // Get all dormitories with owner and committee
-        $dormitories = Dormitory::with(['owner', 'committee'])
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+        if (Auth::user()->role === 'admin') {
+            // Show all dormitories
+            $dormitories = Dormitory::with(['owner', 'committee', 'accreditationSchedules'])
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+        } elseif (Auth::user()->role === 'committee') {
+            // Show only dormitories assigned to this committee
+            $dormitories = Dormitory::with(['owner', 'committee', 'accreditationSchedules'])
+                            ->where('committee_id', Auth::id())
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+        } else {
+            // Optionally, return unauthorized or empty
+            abort(403, 'Unauthorized access.');
+        }
 
-        // Get users who can be assigned as committee members
         $committees = User::where('role', 'committee')->get();
 
         return view('committee.dormitories', compact('dormitories', 'committees'));
@@ -92,64 +105,26 @@ class CommitteeDormitoryController extends Controller
             ->route('committee.dormitories')
             ->with('success', 'Dormitory deleted successfully!');
     }
-    /**
-     * Approve the dormitory and set an accreditation schedule.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function approve(Request $request, $id)
+    
+    public function sendInvitation(Request $request)
     {
         $request->validate([
-            'evaluation_date' => 'required|date|after_or_equal:today',
+            'dormitory_id' => 'required|exists:dormitories,id',
         ]);
 
-        $dormitory = Dormitory::with('owner')->findOrFail($id);
+        $dormitory = Dormitory::with('owner')->findOrFail($request->dormitory_id);
 
-        // Update dormitory status
-        $dormitory->status = 'pending accreditation';
+        // Generate a one-time token and store it
+        $token = Str::uuid();
+        $dormitory->invitation_token = $token;
         $dormitory->save();
 
-        // Create accreditation schedule
-        AccreditationSchedule::create([
-            'dormitory_id' => $dormitory->id,
-            'evaluation_date' => $request->evaluation_date,
-        ]);
+        // Generate registration link
+        $registrationUrl = url("/registration?token={$token}&dorm_id={$dormitory->id}");
 
-        // Send email notification to the owner
-        Mail::to($dormitory->owner->email)->send(new DormitoryStatusChanged($dormitory, 'approved', $request->evaluation_date));
+        // Send email
+        Mail::to($dormitory->email)->send(new DormitoryInvitation($dormitory, $registrationUrl));
 
-        return redirect()
-            ->route('committee.dormitories')
-            ->with('success', 'Dormitory approved and accreditation schedule set.');
-    }
-
-    /**
-     * Decline the dormitory with a reason.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function decline(Request $request, $id)
-    {
-        $request->validate([
-            'decline_reason' => 'required|string|max:500',
-        ]);
-
-        $dormitory = Dormitory::with('owner')->findOrFail($id);
-
-        // Update dormitory status and reason
-        $dormitory->status = 'rejected';
-        $dormitory->decline_reason = $request->decline_reason;
-        $dormitory->save();
-
-        // Send email notification to the owner
-        Mail::to($dormitory->owner->email)->send(new DormitoryStatusChanged($dormitory, 'declined', $request->decline_reason));
-
-        return redirect()
-            ->route('committee.dormitories')
-            ->with('success', 'Dormitory declined successfully.');
+        return redirect()->back()->with('success', 'Invitation email sent successfully.');
     }
 }

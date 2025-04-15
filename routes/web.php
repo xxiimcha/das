@@ -26,7 +26,7 @@ Route::get('/view-dormitories', [DormController::class, 'index'])->name('dormito
 Route::get('/view-dormitories/{id}', [DormController::class, 'show'])->name('public.dormitories.show');
 
 // Registration for Dormitory Owner
-Route::get('/registration', function () {return view('dorm_owner_registration');})->name('register-dorm-owner');
+Route::get('/registration', [OwnerRegistrationController::class, 'show'])->name('register-dorm-owner');
 Route::post('/owner/register', [OwnerRegistrationController::class, 'store'])->name('owner.register');
 
 // User Registration
@@ -65,13 +65,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/dormitories/import', [AdminDormController::class, 'import'])->name('dormitories.import');
     Route::post('/admin/dormitories/import', [AdminDormController::class, 'import'])->name('dormitories.import');
     Route::post('/dormitories/assign-committee', [AdminDormController::class, 'assignCommittee'])->name('dormitories.assignCommittee');
-
+    
     Route::get('/committee/dormitories', [CommitteeDormitoryController::class, 'index'])->name('committee.dormitories');
     Route::post('/committee/dormitories', [CommitteeDormitoryController::class, 'store'])->name('committee.dormitories.store');
     Route::delete('/committee/dormitories/{id}', [CommitteeDormitoryController::class, 'destroy'])->name('committee.dormitories.destroy');
     Route::get('/committee/dormitories/{id}', [CommitteeDormitoryController::class, 'show'])->name('committee.dormitories.show');
     Route::post('/committee/dormitories/{id}/approve', [CommitteeDormitoryController::class, 'approve'])->name('committee.dormitories.approve');
     Route::post('/committee/dormitories/{id}/decline', [CommitteeDormitoryController::class, 'decline'])->name('committee.dormitories.decline');
+    Route::post('/committee/send-invitation', [CommitteeDormitoryController::class, 'sendInvitation'])->name('committee.sendInvitation');
 
     // Criteria Module
     Route::get('/committee/criteria', [CommitteeCriteriaController::class, 'index'])->name('criteria.index');

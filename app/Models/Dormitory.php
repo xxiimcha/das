@@ -22,6 +22,7 @@ class Dormitory extends Model
         'capacity',
         'description',
         'status',
+        'invitation_token'
     ];
     
     public function owner()

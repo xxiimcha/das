@@ -104,11 +104,22 @@
                             <a href="{{ route('committee.dormitories.show', $dormitory->id) }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-eye"></i> View
                             </a>
+
                             <button type="button" class="btn btn-danger btn-sm delete-dormitory-btn"
                                     data-id="{{ $dormitory->id }}" data-name="{{ $dormitory->name }}"
                                     data-bs-toggle="modal" data-bs-target="#deleteDormitoryModal">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
+
+                            @if(Auth::user()->role === 'committee')
+                                <form action="{{ route('committee.sendInvitation') }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="dormitory_id" value="{{ $dormitory->id }}">
+                                    <button type="submit" class="btn btn-warning btn-sm">
+                                        <i class="fas fa-envelope"></i> Send Invitation
+                                    </button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -216,6 +227,16 @@
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function () {
+        $('.send-invite-btn').on('click', function () {
+            const dormId = $(this).data('id');
+            const dormName = $(this).data('name');
+
+            // Placeholder for now
+            alert(`Invitation will be sent to the owner of "${dormName}" (Dormitory ID: ${dormId}) via Email and SMS.`);
+            
+            // TODO: Replace with actual AJAX call or modal trigger for sending
+        });
+
         // 🛠️ Fix the assign committee modal population
         $('.assign-committee-link').on('click', function () {
             const dormId = $(this).data('dormitory-id');
