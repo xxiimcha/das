@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Dormitory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\AccreditationSchedule;
 use Illuminate\Support\Facades\Mail;
@@ -17,10 +18,15 @@ class CommitteeDormitoryController extends Controller
      */
     public function index()
     {
-        // Fetch all dormitories (can add filters as needed)
-        $dormitories = Dormitory::with('owner')->orderBy('created_at', 'desc')->get();
+        // Get all dormitories with owner and committee
+        $dormitories = Dormitory::with(['owner', 'committee'])
+                        ->orderBy('created_at', 'desc')
+                        ->get();
 
-        return view('committee.dormitories', compact('dormitories'));
+        // Get users who can be assigned as committee members
+        $committees = User::where('role', 'committee')->get();
+
+        return view('committee.dormitories', compact('dormitories', 'committees'));
     }
 
     /**

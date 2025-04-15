@@ -11,6 +11,7 @@ class Dormitory extends Model
 
     protected $fillable = [
         'user_id',
+        'committee_id',
         'name',
         'location',
         'formatted_address',
@@ -22,7 +23,7 @@ class Dormitory extends Model
         'description',
         'status',
     ];
-
+    
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -46,5 +47,10 @@ class Dormitory extends Model
     public function accreditationSchedules()
     {
         return $this->hasMany(AccreditationSchedule::class, 'dormitory_id');
+    }
+
+    public function committee()
+    {
+        return $this->belongsTo(User::class, 'committee_id');
     }
 }

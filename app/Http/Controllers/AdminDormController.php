@@ -61,4 +61,18 @@ class AdminDormController extends Controller
             return back()->with('error', 'Failed to import: ' . $e->getMessage());
         }
     }
+
+    public function assignCommittee(Request $request)
+    {
+        $request->validate([
+            'dormitory_id' => 'required|exists:dormitories,id',
+            'committee_id' => 'required|exists:users,id'
+        ]);
+
+        $dorm = Dormitory::findOrFail($request->dormitory_id);
+        $dorm->committee_id = $request->committee_id;
+        $dorm->save();
+
+        return redirect()->back()->with('success', 'Committee assigned successfully.');
+    }
 }

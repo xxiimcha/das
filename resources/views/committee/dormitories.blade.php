@@ -55,6 +55,7 @@
                         <th>#</th>
                         <th>Name</th>
                         <th>Owner</th>
+                        <th>Committee</th> <!-- Added -->
                         <th>Status</th>
                         <th>Evaluation Date</th>
                         <th>Accreditation Date</th>
@@ -68,6 +69,19 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $dormitory->name }}</td>
                         <td>{{ $dormitory->owner->name }}</td>
+                        <td>
+                            @if ($dormitory->committee)
+                                {{ $dormitory->committee->name }}
+                            @else
+                                <a href="#" class="text-danger assign-committee-link" 
+                                    data-dormitory-id="{{ $dormitory->id }}"
+                                    data-dorm-name="{{ $dormitory->name }}"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#assignCommitteeModal">
+                                    Unassigned
+                                </a>
+                            @endif
+                        </td>
                         <td>
                             <span class="badge 
                                 {{ $dormitory->status === 'accredited' ? 'bg-success' : 
@@ -99,8 +113,41 @@
                     </tr>
                     @endforeach
                 </tbody>
+
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Assign Committee Modal -->
+<div class="modal fade" id="assignCommitteeModal" tabindex="-1" aria-labelledby="assignCommitteeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{{ route('dormitories.assignCommittee') }}" class="modal-content border-danger">
+            @csrf
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="assignCommitteeModalLabel">Assign Committee</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>Assign committee to: <strong id="modalDormName"></strong></p>
+                <div class="mb-3">
+                    <label for="committee_id" class="form-label">Select Committee Member</label>
+                    <select name="committee_id" id="committee_id" class="form-select" required>
+                        <option value="">-- Select --</option>
+                        @foreach ($committees as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <input type="hidden" name="dormitory_id" id="modalDormitoryId">
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-danger">Assign</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -166,33 +213,38 @@
     </div>
 </div>
 
-<!-- Scripts -->
-@push('scripts')
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script>
     $(document).ready(function () {
+        // 🛠️ Fix the assign committee modal population
+        $('.assign-committee-link').on('click', function () {
+            const dormId = $(this).data('dormitory-id');
+            const dormName = $(this).data('dorm-name');
+
+            console.log("Clicked Dorm ID:", dormId); // Debug
+
+            $('#modalDormitoryId').val(dormId);
+            $('#modalDormName').text(dormName);
+        });
+
+        // Initialize DataTable
         $('#dormitoriesTable').DataTable({
             order: [[4, "desc"]],
             columnDefs: [{ orderable: false, targets: [7] }]
         });
 
-        // Delete action binding
-        document.querySelectorAll('.delete-dormitory-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const dormitoryId = button.getAttribute('data-id');
-                document.getElementById('deleteDormitoryForm').action = `/committee/dormitories/${dormitoryId}`;
-            });
+        // Delete button logic
+        $('.delete-dormitory-btn').on('click', function () {
+            const dormitoryId = $(this).data('id');
+            $('#deleteDormitoryForm').attr('action', `/committee/dormitories/${dormitoryId}`);
         });
 
-        // Optional: show spinner on import form submit
-        const importForm = document.querySelector('#importModal form');
-        importForm.addEventListener('submit', function () {
+        // Spinner during import
+        $('#importModal form').on('submit', function () {
             const btn = document.getElementById('importSubmitBtn');
             btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...';
             btn.disabled = true;
         });
     });
 </script>
-
-@endpush
 @endsection
