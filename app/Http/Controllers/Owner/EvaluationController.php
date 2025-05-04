@@ -45,22 +45,22 @@ class EvaluationController extends Controller
     public function showEvaluationSchedules()
     {
         $schedules = AccreditationSchedule::with('dormitory')->get();
-        $criterias = Criteria::all();
+        $criteria = Criteria::all();
         $criteriaColumns = CriteriaColumn::all();
 
-        return view('committee.evaluation.index', compact('schedules', 'criterias', 'criteriaColumns'));
+        return view('committee.evaluation.index', compact('schedules', 'criteria', 'criteriaColumns'));
     }
 
     public function showForm(Request $request)
     {
         $scheduleId = $request->query('schedule_id');
         $schedule = AccreditationSchedule::with('dormitory')->findOrFail($scheduleId);
-        $criterias = Criteria::all();
+        $criteria = Criteria::all();
         $criteriaColumns = CriteriaColumn::all();
         $evaluatorName = Auth::user()->name ?? 'Guest';
         $evaluationDate = now()->format('Y-m-d\TH:i');
 
-        return view('committee.evaluation.form', compact('schedule', 'criterias', 'criteriaColumns', 'evaluatorName', 'evaluationDate'));
+        return view('committee.evaluation.form', compact('schedule', 'criteria', 'criteriaColumns', 'evaluatorName', 'evaluationDate'));
     }
 
     public function review($schedule_id)

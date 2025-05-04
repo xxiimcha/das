@@ -32,14 +32,14 @@
                 <thead class="bg-danger text-white">
                     <tr>
                         <th>Criteria</th>
-                        @foreach ($criterias->first()->values as $value)
+                        @foreach ($criteria->first()->values as $value)
                             <th>{{ $value }}</th>
                         @endforeach
                         <th>Rating</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($criterias as $criteria)
+                    @foreach ($criteria as $criteria)
                     <tr>
                         <td><strong>{{ $criteria->criteria_name }}</strong></td>
                         @foreach ((is_string($criteria->values) ? json_decode($criteria->values, true) : $criteria->values) as $value)

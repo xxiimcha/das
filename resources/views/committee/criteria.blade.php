@@ -1,172 +1,78 @@
 @extends('layouts.admin-layout')
 
-@section('title', 'Set Criteria')
+@section('title', 'Import Criteria')
 
 @section('page-title', 'Criteria')
-@section('breadcrumb-title', 'Set Criteria')
+@section('breadcrumb-title', 'Import Criteria')
 
 @section('content')
-<!-- Buttons Outside the Card -->
-<div class="d-flex justify-content-center mb-3">
-    <button id="addRow" class="btn btn-light btn-sm mx-2">
-        <i class="fas fa-plus fa-lg text-danger"></i>
-    </button>
-    <button id="addColumn" class="btn btn-light btn-sm mx-2">
-        <i class="fas fa-columns fa-lg text-danger"></i>
-    </button>
-    <button id="deleteSelected" class="btn btn-light btn-sm mx-2">
-        <i class="fas fa-trash fa-lg text-danger"></i>
-    </button>
-</div>
-
 <div class="card">
     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-        <h5 class="card-title">Dormitory Criteria</h5>
+        <h5 class="card-title">Import Dormitory Criteria</h5>
+    </div>
+    <div class="card-body">
+        <form action="{{ route('criteria.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label for="criteria_file" class="form-label">Upload Criteria File (CSV or Excel):</label>
+                <input type="file" name="criteria_file" id="criteria_file" class="form-control" accept=".csv,.xlsx,.xls" required>
+            </div>
+            <button type="submit" class="btn btn-danger mt-3">
+                <i class="fas fa-file-import"></i> Import Criteria
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (session('success'))
+<div class="alert alert-success mt-3">
+    {{ session('success') }}
+</div>
+@endif
+
+@if (session('error'))
+<div class="alert alert-danger mt-3">
+    {{ session('error') }}
+</div>
+@endif
+
+<div class="card mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="card-title">Imported Criteria</h5>
     </div>
     <div class="card-body table-responsive">
-        <table id="criteriaTable" class="table table-bordered text-center align-middle">
-        <thead class="bg-danger text-white">
-    <tr>
-        <th>Criteria</th>
-        @foreach ($columns as $column)
-            <th>{{ $column->name }}</th>
-        @endforeach
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
-</thead>
-<tbody>
-    @foreach ($criteria as $item)
-    <tr data-id="{{ $item->id }}">
-        <td contenteditable="true">{{ $item->criteria_name }}</td>
-        @foreach ($item->values as $value)
-            <td contenteditable="true">{{ $value }}</td>
-        @endforeach
-        <td>
-            <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-danger' }}">
-                {{ ucfirst($item->status) }}
-            </span>
-        </td>
-        <td>
-            <button class="btn btn-warning btn-sm toggleStatus" data-id="{{ $item->id }}" data-status="{{ $item->status }}">
-                <i class="fas {{ $item->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
-            </button>
-            <button class="btn btn-danger btn-sm deleteRow">
-                <i class="fas fa-trash"></i>
-            </button>
-        </td>
-    </tr>
-    @endforeach
-</tbody>
-
+        <table class="table table-bordered text-center align-middle">
+            <thead class="bg-danger text-white">
+                <tr>
+                    <th>Criteria</th>
+                    @forelse ($columns as $column)
+                        <th>{{ $column->name }}</th>
+                    @empty
+                        <th colspan="1">No columns defined</th>
+                    @endforelse
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($criteria as $item)
+                <tr>
+                    <td>{{ $item->criteria_name }}</td>
+                    @foreach ($item->values ?? [] as $value)
+                        <td>{{ $value }}</td>
+                    @endforeach
+                    <td>
+                        <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-danger' }}">
+                            {{ ucfirst($item->status) }}
+                        </span>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="{{ count($columns) + 2 }}" class="text-muted">No criteria imported yet.</td>
+                </tr>
+                @endforelse
+            </tbody>
         </table>
     </div>
 </div>
-
-<script>
-    $(document).ready(function () {
-        // Add a new row
-        $('#addRow').on('click', function () {
-            const newRow = `
-                <tr>
-                    <td contenteditable="true">New Criteria</td>
-                    @foreach ($columns as $column)
-                        <td contenteditable="true">New Description</td>
-                    @endforeach
-                    <td>
-                        <span class="badge bg-danger">Inactive</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-warning btn-sm toggleStatus" data-status="inactive">
-                            <i class="fas fa-toggle-off"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm deleteRow"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            $('#criteriaTable tbody').append(newRow);
-        });
-
-        // Toggle Activate/Deactivate
-        $(document).on('click', '.toggleStatus', function () {
-            const button = $(this);
-            const row = button.closest('tr');
-            const criteriaId = row.data('id');
-            let currentStatus = button.data('status');
-
-            // Toggle status
-            let newStatus = currentStatus === 'active' ? 'inactive' : 'active';
-
-            // Send AJAX request to update the status
-            $.ajax({
-                url: '{{ route("criteria.toggle.status") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    id: criteriaId,
-                    status: newStatus
-                },
-                success: function (response) {
-                    console.log('Status updated:', response);
-                    button.data('status', newStatus);
-
-                    // Update button icon and badge
-                    button.find('i').toggleClass('fa-toggle-on fa-toggle-off');
-                    const statusBadge = row.find('.badge');
-                    statusBadge.text(newStatus.charAt(0).toUpperCase() + newStatus.slice(1))
-                               .toggleClass('bg-success bg-danger');
-                },
-                error: function (error) {
-                    console.error('Error updating status:', error);
-                }
-            });
-        });
-
-        // Remove a row
-        $(document).on('click', '.deleteRow', function () {
-            const row = $(this).closest('tr');
-            const criteriaId = row.data('id'); 
-
-            // Send AJAX request to delete the row
-            $.ajax({
-                url: '{{ route("criteria.row.delete", ":id") }}'.replace(':id', criteriaId),
-                method: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                },
-                success: function (response) {
-                    console.log('Row deleted:', response);
-                    row.remove();
-                },
-                error: function (error) {
-                    console.error('Error deleting row:', error);
-                },
-            });
-        });
-
-        // Update content when edited
-        $(document).on('focusout', '[contenteditable="true"]', function () {
-            const cell = $(this);
-            const row = cell.closest('tr');
-            const columnIndex = cell.index();
-            const criteriaId = row.data('id');
-
-            $.ajax({
-                url: '{{ route("criteria.row.update") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    id: criteriaId,
-                    column_index: columnIndex,
-                    value: cell.text(),
-                },
-                success: function (response) {
-                    console.log('Cell updated:', response);
-                },
-                error: function (error) {
-                    console.error('Error updating cell:', error);
-                },
-            });
-        });
-    });
-</script>
 @endsection

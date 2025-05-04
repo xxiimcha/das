@@ -11,7 +11,7 @@ class CreateEvaluationDetailsTable extends Migration
         Schema::create('evaluation_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('evaluation_id')->constrained('evaluations')->onDelete('cascade');
-            $table->foreignId('criteria_id')->constrained('criterias')->onDelete('cascade');
+            $table->foreignId('criteria_id')->constrained('criteria')->onDelete('cascade');
             $table->tinyInteger('rating');
             $table->timestamps();
         });
