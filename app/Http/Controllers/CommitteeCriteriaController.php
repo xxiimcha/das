@@ -36,8 +36,14 @@ class CommitteeCriteriaController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray(null, true, true, true);
     
-        // 1. Extract column headers (row 1, columns B to E)
-        $columnHeaders = array_slice($rows[1], 2, 4); // Columns B (index 1) to E (index 4)
+        // 1. Extract column headers from row 1 (columns B–E)
+        $columnHeaders = [
+            $rows[1]['B'] ?? 'Totally Unacceptable',
+            $rows[1]['C'] ?? 'Slightly Acceptable',
+            $rows[1]['D'] ?? 'Acceptable',
+            $rows[1]['E'] ?? 'Completely Acceptable',
+        ];
+    
         CriteriaColumn::truncate();
         foreach ($columnHeaders as $header) {
             if (!empty($header)) {
@@ -45,20 +51,25 @@ class CommitteeCriteriaController extends Controller
             }
         }
     
-        // 2. Reset criteria records
+        // 2. Clear old criteria without violating FK constraints
         Criteria::query()->delete();
         DB::statement('ALTER TABLE criteria AUTO_INCREMENT = 1');
     
-        // 3. Loop through rows starting from row 2
+        // 3. Import criteria data starting from row 2
         for ($i = 2; $i <= count($rows); $i++) {
             $row = $rows[$i] ?? [];
     
-            // A = criteria name (e.g. 1.1. Waste Management)
             $criteriaName = trim($row['A'] ?? '');
-            $values = array_values(array_slice($row, 1, 4)); // B to E
     
-            // Skip if it's a section header (e.g. "2. Facilities") — assume headers do not contain a dot (.)
+            // Check if it's a valid rubric (e.g. "1.1." or "2.2.")
             if (str_contains($criteriaName, '.') && !empty($criteriaName)) {
+                $values = [
+                    $row['B'] ?? '',
+                    $row['C'] ?? '',
+                    $row['D'] ?? '',
+                    $row['E'] ?? '',
+                ];
+    
                 Criteria::create([
                     'criteria_name' => $criteriaName,
                     'values' => json_encode($values),
