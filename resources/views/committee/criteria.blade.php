@@ -14,8 +14,8 @@
         <form action="{{ route('criteria.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="form-group">
-                <label for="criteria_file" class="form-label">Upload Criteria File (CSV or Excel):</label>
-                <input type="file" name="criteria_file" id="criteria_file" class="form-control" accept=".csv,.xlsx,.xls" required>
+                <label for="file" class="form-label">Upload Criteria File (Excel only):</label>
+                <input type="file" name="file" id="file" class="form-control" accept=".xlsx,.xls" required>
             </div>
             <button type="submit" class="btn btn-danger mt-3">
                 <i class="fas fa-file-import"></i> Import Criteria
@@ -57,12 +57,19 @@
                 @forelse ($criteria as $item)
                 <tr>
                     <td>{{ $item->criteria_name }}</td>
+                    @php
+                        $valueCount = count($item->values ?? []);
+                        $columnCount = count($columns);
+                    @endphp
                     @foreach ($item->values ?? [] as $value)
                         <td>{{ $value }}</td>
                     @endforeach
+                    @for ($i = $valueCount; $i < $columnCount; $i++)
+                        <td>—</td> {{-- Empty padding for missing values --}}
+                    @endfor
                     <td>
-                        <span class="badge {{ $item->status === 'active' ? 'bg-success' : 'bg-danger' }}">
-                            {{ ucfirst($item->status) }}
+                        <span class="badge {{ $item->status == 1 ? 'bg-success' : 'bg-secondary' }}">
+                            {{ $item->status == 1 ? 'Active' : 'Inactive' }}
                         </span>
                     </td>
                 </tr>
