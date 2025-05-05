@@ -9,10 +9,9 @@ class DormitoryImage extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'dormitory_id',
-        'image_path',
-    ];
+    protected $table = 'dormitory_images';
+
+    protected $fillable = ['dormitory_id', 'image_path'];
 
     public function dormitory()
     {

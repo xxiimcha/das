@@ -11,7 +11,13 @@ class Criteria extends Model
 
     protected $table = 'criteria'; // Add this line to fix the error
 
-    protected $fillable = ['criteria_name', 'values', 'status'];
+    protected $fillable = [
+        'criteria_name',
+        'values',
+        'status',
+        'batch_id',
+        'archived_at',
+    ];    
 
     protected $casts = [
         'values' => 'array',

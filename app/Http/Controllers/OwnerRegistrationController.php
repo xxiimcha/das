@@ -43,36 +43,54 @@ class OwnerRegistrationController extends Controller
 
     public function store(Request $request)
     {
+        Log::info("Raw Request Payload", $request->all());
+        Log::info("[Dorm Owner Registration] Received submission", [
+            'request_dorm_id' => $request->input('dorm_id'),
+            'request_token' => $request->input('token'),
+            'submitted_fields' => $request->except(['images', 'permits']),
+        ]);
+
         $validated = $request->validate([
             'dorm_id' => 'required|exists:dormitories,id',
             'token' => 'required|string',
-            'dorm_name' => 'required|string|max:255',
             'price_range' => 'required|string|max:50',
             'dorm_capacity' => 'required|integer|min:1',
             'dorm_description' => 'required|string',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'formatted_address' => 'required|string|max:500',
-            'amenities' => 'array|required',
+            'amenities' => 'required|array',
             'images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'permits.*' => 'nullable|file|max:5120',
         ]);
 
         $dorm = Dormitory::findOrFail($validated['dorm_id']);
 
-        // Check if token matches
         if ($dorm->invitation_token !== $validated['token']) {
-            Log::warning("Token mismatch for dorm ID {$dorm->id}. Expected: {$dorm->invitation_token}, Received: {$validated['token']}");
+            Log::warning("[Dorm Owner Registration] Token mismatch", [
+                'dorm_id' => $dorm->id,
+                'expected_token' => $dorm->invitation_token,
+                'submitted_token' => $validated['token']
+            ]);
             return back()->withErrors(['token' => 'Invalid or expired token.']);
         }
 
         try {
             DB::beginTransaction();
 
-            // Update dormitory
+            $coordinates = "{$validated['latitude']},{$validated['longitude']}";
+
+            Log::info("[Dorm Owner Registration] Updating dormitory fields", [
+                'dorm_id' => $dorm->id,
+                'location   ' => $coordinates,
+                'formatted_address' => $validated['formatted_address'],
+                'price_range' => $validated['price_range'],
+                'capacity' => $validated['dorm_capacity'],
+                'description' => $validated['dorm_description'],
+            ]);
+
             $dorm->update([
-                'name' => $validated['dorm_name'],
-                'location' => $validated['latitude'] . ',' . $validated['longitude'],
+                'location' => $coordinates,
                 'formatted_address' => $validated['formatted_address'],
                 'price_range' => $validated['price_range'],
                 'capacity' => $validated['dorm_capacity'],
@@ -80,51 +98,88 @@ class OwnerRegistrationController extends Controller
                 'status' => 'pending',
                 'invitation_token' => null
             ]);
-            Log::info("Dormitory #{$dorm->id} updated by owner: {$dorm->owner->email}");
 
-            // Delete old data
+            // Clear old related data
             $dorm->amenities()->delete();
             $dorm->images()->delete();
             $dorm->documents()->delete();
-            Log::info("Old amenities, images, and documents cleared for dormitory #{$dorm->id}");
 
-            // Insert new amenities
+            Log::info("[Dorm Owner Registration] Cleared previous amenities, images, and documents", [
+                'dorm_id' => $dorm->id
+            ]);
+
+            // Insert amenities
+            $amenityLogs = [];
             foreach ($validated['amenities'] as $index => $amenity) {
-                $dorm->amenities()->create([
-                    'name' => $amenity,
-                    'icon' => $request->input("amenity_icons.$index", null),
+                $icon = $request->input("amenity_icons.$index", null);
+                if ($amenity) {
+                    $dorm->amenities()->create([
+                        'name' => $amenity,
+                        'icon' => $icon,
+                    ]);
+                    $amenityLogs[] = ['name' => $amenity, 'icon' => $icon];
+                }
+            }
+
+            Log::info("[Dorm Owner Registration] Inserted amenities", [
+                'dorm_id' => $dorm->id,
+                'amenities' => $amenityLogs
+            ]);
+
+            // Upload images
+            if ($request->hasFile('images')) {
+                $imagePaths = [];
+                foreach ($request->file('images') as $image) {
+                    if ($image->isValid()) {
+                        $path = $image->store('public/dorm_images');
+                        $dorm->images()->create(['image_path' => $path]);
+                        $imagePaths[] = $path;
+                    }
+                }
+                Log::info("[Dorm Owner Registration] Uploaded images", [
+                    'dorm_id' => $dorm->id,
+                    'image_paths' => $imagePaths
                 ]);
             }
-            Log::info("Inserted " . count($validated['amenities']) . " amenities for dormitory #{$dorm->id}");
 
-            // Insert new images
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
-                    $path = $image->store('public/dorm_images');
-                    $dorm->images()->create(['image_path' => $path]);
-                }
-                Log::info("Dormitory #{$dorm->id} images uploaded.");
-            }
-
-            // Insert new permits
+            // Upload permits
             if ($request->hasFile('permits')) {
+                $permitPaths = [];
                 foreach ($request->file('permits') as $permit) {
-                    $path = $permit->store('public/dorm_documents');
-                    $dorm->documents()->create(['file_path' => $path]);
+                    if ($permit->isValid()) {
+                        $path = $permit->store('public/dorm_documents');
+                        $dorm->documents()->create(['file_path' => $path]);
+                        $permitPaths[] = $path;
+                    }
                 }
-                Log::info("Dormitory #{$dorm->id} permits/documents uploaded.");
+                Log::info("[Dorm Owner Registration] Uploaded permits/documents", [
+                    'dorm_id' => $dorm->id,
+                    'permit_paths' => $permitPaths
+                ]);
             }
 
             DB::commit();
-            Log::info("Dormitory #{$dorm->id} registration completed. Token invalidated.");
+            Log::info("[Dorm Owner Registration] Registration successful", [
+                'dorm_id' => $dorm->id,
+                'status' => 'pending'
+            ]);
 
             return redirect('/')->with('success', 'Registration completed! Awaiting approval.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Owner form update failed for dormitory #{$dorm->id}: {$e->getMessage()}", [
-                'trace' => $e->getTraceAsString()
+            Log::error("[Dorm Owner Registration] Registration failed", [
+                'dorm_id' => $dorm->id ?? 'N/A',
+                'error_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_payload' => $request->all()
             ]);
-            return back()->with('error', 'Something went wrong. Please try again.');
+        
+            // Return proper JSON for JS
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
         }
+        
     }
 }

@@ -14,17 +14,28 @@ class Dormitory extends Model
         'committee_id',
         'name',
         'location',
-        'formatted_address',
-        'contact_number',
-        'email',
-        'owner_address',
-        'price_range',
+        'formatted_address',     // nullable
+        'contact_number',        // nullable
+        'email',                 // nullable
+        'owner_address',         // nullable
+        'price_range',           // nullable
         'capacity',
-        'description',
+        'description',           // nullable
         'status',
-        'invitation_token'
+        'invitation_token'       // nullable
     ];
-    
+
+    // Optional: Laravel will cast nulls to strings, so if you want, define these casts
+    protected $casts = [
+        'formatted_address' => 'string',
+        'contact_number' => 'string',
+        'email' => 'string',
+        'owner_address' => 'string',
+        'price_range' => 'string',
+        'description' => 'string',
+        'invitation_token' => 'string',
+    ];
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');

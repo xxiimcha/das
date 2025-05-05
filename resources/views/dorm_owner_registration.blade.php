@@ -11,7 +11,7 @@
     <div class="card shadow border-0">
         <div class="card-body">
             <!-- Form -->
-            <form method="POST" enctype="multipart/form-data" action="{{ route('owner.register') }}" id="registrationForm">
+            <form method="POST" enctype="multipart/form-data" action="{{ route('owner.register') }}" id="registrationForm" onsubmit="return false;">
                 @csrf
                 <!-- Hidden Inputs for Validation -->
                 <input type="hidden" name="dorm_id" value="{{ $dorm->id }}">
@@ -36,12 +36,12 @@
                     <div class="col-md-6">
                         <label for="ownerPhone" class="form-label">Phone Number</label>
                         <input type="text" id="ownerPhone" name="owner_phone" class="form-control" 
-                            value="{{ $owner->contact_number ?? old('owner_phone') }}" readonly>
+                            value="{{ $dorm->contact_number ?? old('owner_phone') }}" readonly>
                     </div>
                     <div class="col-md-6">
                         <label for="ownerAddress" class="form-label">Address</label>
                         <input type="text" id="ownerAddress" name="owner_address" class="form-control" 
-                            value="{{ $owner->owner_address ?? old('owner_address') }}" readonly>
+                            value="{{ $dorm->owner_address ?? old('owner_address') }}" readonly>
                     </div>
                 </div>
 
@@ -56,9 +56,9 @@
                     </div>
                 </div>
 
-                <input type="hidden" id="latitude" name="latitude">
-                <input type="hidden" id="longitude" name="longitude">
-                <input type="hidden" id="formatted_address" name="formatted_address">
+                <input type="text" id="latitude" name="latitude">
+                <input type="text" id="longitude" name="longitude">
+                <input type="text" id="formatted_address" name="formatted_address">
 
                 <!-- Dormitory Details Section -->
                 <h3 class="text-primary">Dormitory Details</h3>
@@ -207,6 +207,50 @@
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
 <script>
+     document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("registrationForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const loader = document.getElementById("fullPageLoader");
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            loader.classList.remove('d-none');
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    },
+                    body: formData
+                });
+
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+
+                const data = await response.json();
+
+                loader.classList.add('d-none');
+
+                if (data.status === 'error') {
+                    alert("Error: " + data.message);
+                } else {
+                    alert("Submission failed. Please try again.");
+                }
+
+            } catch (error) {
+                loader.classList.add('d-none');
+                alert("JS Error: " + error.message);
+                console.error("JS Fetch Error:", error);
+            }
+        });
+
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
         var map = L.map('map').setView([14.5995, 120.9842], 12); // Default to Manila, adjust as needed
 

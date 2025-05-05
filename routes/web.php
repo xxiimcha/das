@@ -83,6 +83,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/committee/criteria/save', [CommitteeCriteriaController::class, 'saveChanges'])->name('criteria.save.changes');
     Route::post('/criteria/toggle-status', [CommitteeCriteriaController::class, 'toggleStatus'])->name('criteria.toggle.status');
     Route::post('/committee/criteria/import', [CommitteeCriteriaController::class, 'import'])->name('criteria.import');
+    Route::post('/committee/criteria/restore/{batchId}', [CommitteeCriteriaController::class, 'restore'])->name('criteria.restore');
+    Route::get('/committee/criteria/preview/{batchId}', [CommitteeCriteriaController::class, 'preview'])->name('criteria.preview');
 
     // Evaluation Module 
     Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submit'])->name('evaluation.submit');

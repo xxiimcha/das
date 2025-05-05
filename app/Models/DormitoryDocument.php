@@ -9,10 +9,9 @@ class DormitoryDocument extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'dormitory_id',
-        'file_path',
-    ];
+    protected $table = 'dormitory_documents';
+
+    protected $fillable = ['dormitory_id', 'file_path'];
 
     public function dormitory()
     {
