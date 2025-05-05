@@ -6,12 +6,20 @@
 @section('breadcrumb-title', 'Import Criteria')
 
 @section('content')
+<!-- Import Animation Overlay -->
+<div id="loadingOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:1050; justify-content:center; align-items:center;">
+    <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status">
+        <span class="visually-hidden">Importing...</span>
+    </div>
+    <p class="mt-3 text-danger fw-bold">Importing... Please wait.</p>
+</div>
+
 <div class="card">
     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
         <h5 class="card-title">Import Dormitory Criteria</h5>
     </div>
     <div class="card-body">
-        <form action="{{ route('criteria.import') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('criteria.import') }}" method="POST" enctype="multipart/form-data" id="importForm">
             @csrf
             <div class="form-group">
                 <label for="file" class="form-label">Upload Criteria File (Excel only):</label>
@@ -53,7 +61,6 @@
                 <span>Archived on: <strong>{{ $createdDate }}</strong></span>
                 <div>
                     <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#{{ $modalId }}">
-
                         Preview
                     </button>
                     <form action="{{ route('criteria.restore', ['batchId' => $batch->batch_id]) }}" method="POST" class="d-inline-block">
@@ -71,9 +78,7 @@
                     <div class="modal-content">
                         <div class="modal-header bg-dark text-white">
                             <h5 class="modal-title">Archived Batch Preview ({{ $createdDate }})</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body table-responsive">
                             <table class="table table-bordered text-center align-middle">
@@ -159,10 +164,19 @@
         </table>
     </div>
 </div>
+
 <script>
+    // Show loader on import
+    document.getElementById('importForm').addEventListener('submit', function () {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    });
+
+    // Optional: modal table focus
     document.addEventListener('DOMContentLoaded', function () {
-        $('.modal').on('shown.bs.modal', function () {
-            $(this).find('table').focus();
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('shown.bs.modal', () => {
+                modal.querySelector('table')?.focus();
+            });
         });
     });
 </script>
