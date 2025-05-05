@@ -8,11 +8,13 @@
 @section('content')
 
 <div class="card shadow card-danger card-outline">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title"><i class="fas fa-users"></i> User Management</h3>
-        <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
-            <i class="fas fa-user-plus"></i> New User
-        </button>
+    <div class="card-header d-flex align-items-center">
+        <h3 class="card-title mb-0"><i class="fas fa-users"></i> User Management</h3>
+        <div class="ms-auto">
+            <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="fas fa-user-plus"></i> New User
+            </button>
+        </div>
     </div>
     <div class="card-body">
         <!-- Toastr Alerts -->
