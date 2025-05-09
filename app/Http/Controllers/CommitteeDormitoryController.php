@@ -106,6 +106,29 @@ class CommitteeDormitoryController extends Controller
             ->with('success', 'Dormitory deleted successfully!');
     }
     
+    public function approve(Request $request, $id)
+    {
+        $request->validate([
+            'evaluation_date' => 'required|date',
+        ]);
+
+        $dormitory = Dormitory::findOrFail($id);
+
+        // Update the dormitory status
+        $dormitory->status = 'accredited';
+        $dormitory->save();
+
+        // Optionally create or update AccreditationSchedule
+        $dormitory->accreditationSchedules()->create([
+            'evaluation_date' => $request->evaluation_date,
+            'status' => 'accredited',
+        ]);
+
+        return redirect()
+            ->route('committee.dormitories.show', $id)
+            ->with('success', 'Dormitory approved successfully.');
+    }
+
     public function sendInvitation(Request $request)
     {
         $request->validate([

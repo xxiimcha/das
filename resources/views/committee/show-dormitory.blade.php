@@ -35,7 +35,7 @@
             <div class="col-md-6">
                 <strong>Status:</strong>
                 <p>{{ ucfirst($dormitory->status) }}</p>
-                @if ($dormitory->status === 'pending' && auth()->user()->role !== 'admin')
+                @if ($dormitory->status === 'accepted' && auth()->user()->role !== 'admin')
                     <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal">Approve</button>
                     <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#declineModal">Decline</button>
                 @endif

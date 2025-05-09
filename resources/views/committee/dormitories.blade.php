@@ -111,7 +111,7 @@
                                 <i class="fas fa-trash"></i> Delete
                             </button>
 
-                            @if(Auth::user()->role === 'committee')
+                            @if(Auth::user()->role === 'committee' && $dormitory->status === 'pending')
                                 <form action="{{ route('committee.sendInvitation') }}" method="POST" class="d-inline">
                                     @csrf
                                     <input type="hidden" name="dormitory_id" value="{{ $dormitory->id }}">
