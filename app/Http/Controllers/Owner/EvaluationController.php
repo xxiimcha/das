@@ -55,13 +55,35 @@ class EvaluationController extends Controller
     {
         $scheduleId = $request->query('schedule_id');
         $schedule = AccreditationSchedule::with('dormitory')->findOrFail($scheduleId);
-        $criteria = Criteria::all();
+
+        // Get the first active criteria to extract the batch_id
+        $firstCriteria = Criteria::where('status', 1)->first();
+
+        if (!$firstCriteria) {
+            abort(404, 'No active criteria found.');
+        }
+
+        $batchId = $firstCriteria->batch_id;
+
+        // Fetch all active criteria with the same batch
+        $criteria = Criteria::where('status', 1)
+            ->where('batch_id', $batchId)
+            ->get();
+
         $criteriaColumns = CriteriaColumn::all();
         $evaluatorName = Auth::user()->name ?? 'Guest';
         $evaluationDate = now()->format('Y-m-d\TH:i');
 
-        return view('committee.evaluation.form', compact('schedule', 'criteria', 'criteriaColumns', 'evaluatorName', 'evaluationDate'));
+        return view('committee.evaluation.form', compact(
+            'schedule',
+            'criteria',
+            'criteriaColumns',
+            'evaluatorName',
+            'evaluationDate',
+            'batchId'
+        ));
     }
+
 
     public function review($schedule_id)
     {

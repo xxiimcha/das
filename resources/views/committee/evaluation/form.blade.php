@@ -12,9 +12,10 @@
         <h3 class="card-title">Evaluate Dormitory</h3>
     </div>
     <div class="card-body">
-        <form method="POST" action="{{ route('evaluation.submit') }}">
+        <form method="POST" action="{{ route('evaluation.submit') }}" id="evaluationForm">
             @csrf
             <input type="hidden" name="schedule_id" value="{{ $schedule->id }}">
+            <input type="hidden" name="batch_id" value="{{ $batchId }}">
 
             <div class="mb-3">
                 <label class="form-label"><strong>Evaluator Name:</strong></label>
@@ -28,30 +29,68 @@
 
             <h5><strong>Dormitory: </strong> {{ $schedule->dormitory->name ?? 'N/A' }}</h5>
 
-            <table class="table table-bordered mt-3 text-center">
+            <table class="table table-bordered mt-3 text-center" id="evaluationTable">
                 <thead class="bg-danger text-white">
                     <tr>
                         <th>Criteria</th>
-                        @foreach ($criteria->first()->values as $value)
-                            <th>{{ $value }}</th>
+
+                        @php
+                            $valueOptions = [];
+                            foreach ($criteria as $c) {
+                                if (!empty($c->values)) {
+                                    $decoded = is_string($c->values) ? json_decode($c->values, true) : (array) $c->values;
+                                    if (is_array($decoded) && count($decoded) > 0) {
+                                        $valueOptions = $decoded;
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        @foreach ($criteriaColumns as $col)
+                            <th>{{ $col->name }}</th>
                         @endforeach
+
                         <th>Rating</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($criteria as $criteria)
-                    <tr>
-                        <td><strong>{{ $criteria->criteria_name }}</strong></td>
-                        @foreach ((is_string($criteria->values) ? json_decode($criteria->values, true) : $criteria->values) as $value)
-                            <td>{{ $value }}</td>
-                        @endforeach
-                        <td>
-                            <input type="number" class="form-control" name="criteria[{{ $criteria->id }}][rating]" min="1" max="5" required>
-                        </td>
-                    </tr>
+                    @foreach ($criteria as $item)
+                        @php
+                            $decodedValues = is_string($item->values) ? json_decode($item->values, true) : (array) $item->values;
+                            $hasValues = is_array($decodedValues) && count(array_filter($decodedValues)) > 0;
+                        @endphp
+
+                        @if (!$hasValues)
+                            <tr class="table-light">
+                                <td colspan="{{ $criteriaColumns->count() + 1 }}" class="text-start fw-bold">{{ $item->criteria_name }}</td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td class="fw-semibold text-start">{{ $item->criteria_name }}</td>
+                                @foreach ($decodedValues as $val)
+                                    <td>{{ $val }}</td>
+                                @endforeach
+                                <td>
+                                    <input type="number" class="form-control rating-input" name="criteria[{{ $item->id }}][rating]" min="1" max="4" oninput="this.value = Math.min(this.value, 4)" required>
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                 </tbody>
             </table>
+
+            <!-- Total Rating Display -->
+            <div class="text-end mt-3">
+                <strong>Total Rating:</strong>
+                <span id="totalRating" class="badge bg-danger fs-6">0 / 0</span>
+            </div>
+
+            <!-- Auto Remarks -->
+            <div class="text-end mt-2">
+                <strong>Remarks:</strong>
+                <span id="remarks" class="badge fs-6 bg-secondary d-none">Pending</span>
+            </div>
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-success">Submit Evaluation</button>
@@ -60,4 +99,54 @@
         </form>
     </div>
 </div>
+
+<script>
+function calculateTotalRating() {
+    let total = 0;
+    const highestScore = 4;
+
+    const ratingInputs = document.querySelectorAll('.rating-input');
+    const totalScorableRows = ratingInputs.length;
+    const expectedTotal = totalScorableRows * highestScore;
+
+    let hasInput = false;
+
+    ratingInputs.forEach(input => {
+        let val = parseFloat(input.value);
+        if (!isNaN(val)) {
+            if (val > highestScore) {
+                val = highestScore;
+                input.value = highestScore;
+            }
+            total += val;
+            hasInput = true;
+        }
+    });
+
+    document.getElementById('totalRating').textContent = `${total.toFixed(0)} / ${expectedTotal}`;
+
+    const remarksEl = document.getElementById('remarks');
+    if (hasInput) {
+        remarksEl.classList.remove('d-none');
+        const percentage = expectedTotal === 0 ? 0 : (total / expectedTotal) * 100;
+        if (percentage >= 75) {
+            remarksEl.textContent = 'Pass';
+            remarksEl.className = 'badge fs-6 bg-success';
+        } else {
+            remarksEl.textContent = 'Failed';
+            remarksEl.className = 'badge fs-6 bg-danger';
+        }
+    } else {
+        remarksEl.classList.add('d-none');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.rating-input').forEach(input => {
+        input.addEventListener('input', calculateTotalRating);
+    });
+
+    calculateTotalRating();
+});
+</script>
 @endsection
