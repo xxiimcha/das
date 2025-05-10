@@ -11,6 +11,7 @@ use App\Mail\DormitoryStatusChanged;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Mail\DormitoryInvitation;
+use App\Mail\EvaluationScheduled;
 
 class CommitteeDormitoryController extends Controller
 {
@@ -106,27 +107,33 @@ class CommitteeDormitoryController extends Controller
             ->with('success', 'Dormitory deleted successfully!');
     }
     
+
     public function approve(Request $request, $id)
     {
         $request->validate([
             'evaluation_date' => 'required|date',
         ]);
 
-        $dormitory = Dormitory::findOrFail($id);
+        $dormitory = Dormitory::with('owner')->findOrFail($id);
 
-        // Update the dormitory status
-        $dormitory->status = 'accredited';
+        // Update dormitory status
+        $dormitory->status = 'pending accreditation';
         $dormitory->save();
 
-        // Optionally create or update AccreditationSchedule
+        // Create accreditation schedule
         $dormitory->accreditationSchedules()->create([
             'evaluation_date' => $request->evaluation_date,
-            'status' => 'accredited',
+            'status' => 'pending',
         ]);
+
+        // Send email to owner
+        Mail::to($dormitory->owner->email)->send(
+            new EvaluationScheduled($dormitory, $request->evaluation_date)
+        );
 
         return redirect()
             ->route('committee.dormitories.show', $id)
-            ->with('success', 'Dormitory approved successfully.');
+            ->with('success', 'Dormitory marked for accreditation and owner notified.');
     }
 
     public function sendInvitation(Request $request)
