@@ -18,6 +18,8 @@ use App\Http\Controllers\Owner\EvaluationController;
 
 use App\Http\Controllers\DormController;
 
+use App\Http\Controllers\EvaluationCriteriaRatingController;
+
 // Landing Page (accessible without login)
 Route::view('/', 'landing');
 
@@ -93,9 +95,9 @@ Route::middleware('auth')->group(function () {
     // Evaluation Module 
     Route::post('/committee/evaluation/submit', [EvaluationController::class, 'submit'])->name('evaluation.submit');
     Route::get('/committee/evaluation/review/{schedule_id}', [EvaluationController::class, 'review'])->name('evaluation.review');
-    Route::post('/committee/evaluation/review/{schedule_id}/submit', [EvaluationController::class, 'submitReview'])
-    ->name('evaluation.review.submit');
-
+    Route::post('/committee/evaluation/review/{schedule_id}/submit', [EvaluationController::class, 'submitReview'])->name('evaluation.review.submit');
+    Route::post('/evaluation/criteria/submit', [EvaluationCriteriaRatingController::class, 'store'])->name('evaluation.criteria.submit');
+    
     // Owner 
     // Links
     Route::view('/dashboard', 'owner.dashboard')->name('owner.dashboard');

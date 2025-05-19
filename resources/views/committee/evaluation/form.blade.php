@@ -12,7 +12,7 @@
         <h3 class="card-title">Evaluate Dormitory</h3>
     </div>
     <div class="card-body">
-        <form method="POST" action="{{ route('evaluation.submit') }}" id="evaluationForm">
+        <form method="POST" action="{{ route('evaluation.criteria.submit') }}" id="evaluationForm">
             @csrf
             <input type="hidden" name="schedule_id" value="{{ $schedule->id }}">
             <input type="hidden" name="batch_id" value="{{ $batchId }}">
@@ -24,7 +24,7 @@
 
             <div class="mb-3">
                 <label class="form-label"><strong>Evaluation Date & Time:</strong></label>
-                <input type="datetime-local" class="form-control" name="evaluation_date" value="{{ Carbon::now()->format('Y-m-d\TH:i') }}" required>
+                <input type="datetime-local" class="form-control" name="evaluation_date" value="{{ Carbon::now()->format('Y-m-d\\TH:i') }}" required>
             </div>
 
             <h5><strong>Dormitory: </strong> {{ $schedule->dormitory->name ?? 'N/A' }}</h5>
@@ -33,7 +33,6 @@
                 <thead class="bg-danger text-white">
                     <tr>
                         <th>Criteria</th>
-
                         @php
                             $valueOptions = [];
                             foreach ($criteria as $c) {
@@ -63,7 +62,7 @@
 
                         @if (!$hasValues)
                             <tr class="table-light">
-                                <td colspan="{{ $criteriaColumns->count() + 1 }}" class="text-start fw-bold">{{ $item->criteria_name }}</td>
+                                <td colspan="{{ $criteriaColumns->count() + 2 }}" class="text-start fw-bold">{{ $item->criteria_name }}</td>
                             </tr>
                         @else
                             <tr>
@@ -80,13 +79,11 @@
                 </tbody>
             </table>
 
-            <!-- Total Rating Display -->
             <div class="text-end mt-3">
                 <strong>Total Rating:</strong>
                 <span id="totalRating" class="badge bg-danger fs-6">0 / 0</span>
             </div>
 
-            <!-- Auto Remarks -->
             <div class="text-end mt-2">
                 <strong>Remarks:</strong>
                 <span id="remarks" class="badge fs-6 bg-secondary d-none">Pending</span>
