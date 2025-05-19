@@ -18,14 +18,42 @@ use Illuminate\Support\Facades\Mail;
 
 class EvaluationController extends Controller
 {
-    /**
-     * Display a list of all dormitories.
-     */
     public function index()
     {
-        $dormitories = Dormitory::all(); // Fetch all dormitories
-        return view('owner.evaluation.index', compact('dormitories')); // Pass to the view
+        $ownerId = Auth::id(); // current logged-in owner
+
+        // Fetch dormitories owned by this user with evaluator, latest schedule, ratings and criteria
+        $dormitories = Dormitory::with([
+            'committee',
+            'accreditationSchedules' => function ($query) {
+                $query->latest()->limit(1); // get only the latest schedule
+            },
+            'accreditationSchedules.ratings.criteria' // load criteria relationship
+        ])
+        ->where('user_id', $ownerId)
+        ->get();
+
+        // Process average ratings and evaluator display
+        foreach ($dormitories as $dormitory) {
+            $schedule = $dormitory->accreditationSchedules->first();
+
+            if ($schedule && $schedule->ratings->count()) {
+                $ratings = $schedule->ratings->pluck('rating')->filter()->map(function ($rate) {
+                    return is_numeric($rate) ? floatval($rate) : 0;
+                });
+
+                $dormitory->average_rating = $ratings->avg();
+            } else {
+                $dormitory->average_rating = null;
+            }
+
+            $dormitory->evaluator = optional($dormitory->committee)->name ?? 'Unassigned';
+        }
+
+        return view('owner.evaluation.index', compact('dormitories'));
     }
+
+
 
     /**
      * Show the evaluation details for a specific dormitory.

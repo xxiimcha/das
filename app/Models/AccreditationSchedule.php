@@ -27,6 +27,6 @@ class AccreditationSchedule extends Model
 
     public function ratings()
     {
-        return $this->hasMany(\App\Models\EvaluationCriteriaRating::class, 'schedule_id');
+        return $this->hasMany(EvaluationCriteriaRating::class, 'schedule_id');
     }
 }
