@@ -87,12 +87,17 @@ class EvaluationController extends Controller
 
     public function review($schedule_id)
     {
-        // Fetch the schedule with evaluations
-        $schedule = AccreditationSchedule::with('evaluations.criteria')->findOrFail($schedule_id);
-    
-        // Fetch all criteria separately
+        // Load the schedule with all evaluation ratings
+        $schedule = AccreditationSchedule::with([
+            'dormitory',
+            'ratings.criteria' => function ($query) {
+                $query->select('criteria.id', 'criteria_name', 'values');
+            }
+        ])->findOrFail($schedule_id);
+
+        // Get all criteria for displaying maximum columns
         $criteria = Criteria::all();
-    
+
         return view('committee.evaluation.review', compact('schedule', 'criteria'));
     }
     
