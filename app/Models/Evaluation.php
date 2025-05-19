@@ -28,8 +28,9 @@ class Evaluation extends Model
 
     public function details()
     {
-        return $this->hasMany(EvaluationDetail::class, 'evaluation_id');
+        return $this->hasMany(EvaluationCriteriaRating::class, 'evaluation_id');
     }
+
 
     public function criteria()
     {

@@ -135,21 +135,9 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-calendar-check"></i>
-                                    <p>Inspection</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="{{ route('evaluation.schedules') }}" class="nav-link">
                                     <i class="nav-icon bi bi-search"></i>
                                     <p>Evaluation</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-clipboard-check"></i>
-                                    <p>Approval</p>
                                 </a>
                             </li>
                         @endif

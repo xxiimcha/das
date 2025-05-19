@@ -57,7 +57,11 @@ class CommitteeDormitoryController extends Controller
             'amenities',
             'images',
             'documents',
-            'accreditationSchedules.evaluations.details.criteria' // Ensure criteria is included
+            'accreditationSchedules.evaluations.details.criteria',
+            'accreditationSchedules.evaluations.schedule',
+            'accreditationSchedules.evaluations' => function ($query) {
+                $query->with('details.criteria'); // nested eager load
+            }
         ])->findOrFail($id);
 
         // Get latest accreditation schedule for status
@@ -66,7 +70,6 @@ class CommitteeDormitoryController extends Controller
 
         return view('committee.show-dormitory', compact('dormitory', 'status'));
     }
-
 
     /**
      * Store a newly created dormitory in storage.

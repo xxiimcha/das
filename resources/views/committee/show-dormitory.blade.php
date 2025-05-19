@@ -105,27 +105,27 @@
                     <tbody>
                         @forelse ($dormitory->accreditationSchedules ?? [] as $schedule)
                             @forelse ($schedule->evaluations ?? [] as $evaluation)
-                            <tr>
-                                <td>{{ \Carbon\Carbon::parse($evaluation->evaluation_date)->format('M d, Y') ?? 'N/A' }}</td>
-                                <td>{{ $evaluation->evaluator_name ?? 'Unknown' }}</td>
-                                <td>{{ $evaluation->schedule->status ?? 'Pending' }}</td>
-                                <td>
-                                <button class="btn btn-info btn-sm view-evaluation-btn"
-                                    data-id="{{ $evaluation->id }}"
-                                    data-date="{{ $evaluation->evaluation_date }}"
-                                    data-evaluator="{{ $evaluation->evaluator_name }}"
-                                    data-result="{{ $evaluation->schedule->status ?? 'Pending' }}"
-                                    data-remarks="{{ $evaluation->remarks ?? 'No remarks available' }}"
-                                    data-criteria='@json($evaluation->details->map(function($detail) {
-                                        return [
-                                            "criteria_name" => $detail->criteria->criteria_name ?? "N/A", // FIXED
-                                            "rating" => $detail->rating
-                                        ];
-                                    }))'>
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($evaluation->evaluation_date)->format('M d, Y') }}</td>
+                                    <td>{{ $evaluation->evaluator_name ?? 'Unknown' }}</td>
+                                    <td>{{ $schedule->status ?? 'Pending' }}</td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm view-evaluation-btn"
+                                            data-id="{{ $evaluation->id }}"
+                                            data-date="{{ $evaluation->evaluation_date }}"
+                                            data-evaluator="{{ $evaluation->evaluator_name }}"
+                                            data-result="{{ $schedule->status }}"
+                                            data-remarks="{{ $evaluation->remarks ?? 'No remarks available' }}"
+                                            data-criteria='@json($evaluation->details->map(function($detail) {
+                                                return [
+                                                    "criteria_name" => $detail->criteria->criteria_name ?? "N/A",
+                                                    "rating" => $detail->rating
+                                                ];
+                                            }))'>
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
                             @empty
                                 <tr>
                                     <td colspan="4" class="text-center">No evaluations yet</td>
@@ -136,6 +136,7 @@
                                 <td colspan="4" class="text-center">No scheduled evaluations</td>
                             </tr>
                         @endforelse
+
                     </tbody>
                 </table>
             </div>
