@@ -13,6 +13,7 @@ use App\Models\DormitoryImage;
 use App\Models\DormitoryDocument;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OwnerRegistrationMail;
+use App\Mail\DormAcceptedMail;
 
 class OwnerRegistrationController extends Controller
 {
@@ -25,13 +26,17 @@ class OwnerRegistrationController extends Controller
             abort(403, 'Invalid access link.');
         }
 
-        // Get dorm with matching ID and token
         $dorm = Dormitory::with('owner')
             ->where('id', $dormId)
-            ->where('invitation_token', $token)
             ->first();
 
-        if (!$dorm) {
+        // If the token has already been used (null), redirect to Thank You page
+        if ($dorm && $dorm->invitation_token === null) {
+            return redirect()->route('thank.you');
+        }
+
+        // If token does not match or dorm doesn't exist
+        if (!$dorm || $dorm->invitation_token !== $token) {
             abort(403, 'This link has expired or is invalid.');
         }
 
@@ -40,7 +45,6 @@ class OwnerRegistrationController extends Controller
             'owner' => $dorm->owner
         ]);
     }
-
     public function store(Request $request)
     {
         Log::info("Raw Request Payload", $request->all());
@@ -64,7 +68,7 @@ class OwnerRegistrationController extends Controller
             'permits.*' => 'nullable|file|max:5120',
         ]);
 
-        $dorm = Dormitory::findOrFail($validated['dorm_id']);
+        $dorm = Dormitory::with('owner')->findOrFail($validated['dorm_id']);
 
         if ($dorm->invitation_token !== $validated['token']) {
             Log::warning("[Dorm Owner Registration] Token mismatch", [
@@ -72,7 +76,10 @@ class OwnerRegistrationController extends Controller
                 'expected_token' => $dorm->invitation_token,
                 'submitted_token' => $validated['token']
             ]);
-            return back()->withErrors(['token' => 'Invalid or expired token.']);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid or expired token.'
+            ], 403);
         }
 
         try {
@@ -80,36 +87,20 @@ class OwnerRegistrationController extends Controller
 
             $coordinates = "{$validated['latitude']},{$validated['longitude']}";
 
-            Log::info("[Dorm Owner Registration] Updating dormitory fields", [
-                'dorm_id' => $dorm->id,
-                'location   ' => $coordinates,
-                'formatted_address' => $validated['formatted_address'],
-                'price_range' => $validated['price_range'],
-                'capacity' => $validated['dorm_capacity'],
-                'description' => $validated['dorm_description'],
-            ]);
-
             $dorm->update([
                 'location' => $coordinates,
                 'formatted_address' => $validated['formatted_address'],
                 'price_range' => $validated['price_range'],
                 'capacity' => $validated['dorm_capacity'],
                 'description' => $validated['dorm_description'],
-                'status' => 'pending',
+                'status' => 'accepted',
                 'invitation_token' => null
             ]);
 
-            // Clear old related data
             $dorm->amenities()->delete();
             $dorm->images()->delete();
             $dorm->documents()->delete();
 
-            Log::info("[Dorm Owner Registration] Cleared previous amenities, images, and documents", [
-                'dorm_id' => $dorm->id
-            ]);
-
-            // Insert amenities
-            $amenityLogs = [];
             foreach ($validated['amenities'] as $index => $amenity) {
                 $icon = $request->input("amenity_icons.$index", null);
                 if ($amenity) {
@@ -117,54 +108,37 @@ class OwnerRegistrationController extends Controller
                         'name' => $amenity,
                         'icon' => $icon,
                     ]);
-                    $amenityLogs[] = ['name' => $amenity, 'icon' => $icon];
                 }
             }
 
-            Log::info("[Dorm Owner Registration] Inserted amenities", [
-                'dorm_id' => $dorm->id,
-                'amenities' => $amenityLogs
-            ]);
-
-            // Upload images
             if ($request->hasFile('images')) {
-                $imagePaths = [];
                 foreach ($request->file('images') as $image) {
                     if ($image->isValid()) {
                         $path = $image->store('public/dorm_images');
                         $dorm->images()->create(['image_path' => $path]);
-                        $imagePaths[] = $path;
                     }
                 }
-                Log::info("[Dorm Owner Registration] Uploaded images", [
-                    'dorm_id' => $dorm->id,
-                    'image_paths' => $imagePaths
-                ]);
             }
 
-            // Upload permits
             if ($request->hasFile('permits')) {
-                $permitPaths = [];
                 foreach ($request->file('permits') as $permit) {
                     if ($permit->isValid()) {
                         $path = $permit->store('public/dorm_documents');
                         $dorm->documents()->create(['file_path' => $path]);
-                        $permitPaths[] = $path;
                     }
                 }
-                Log::info("[Dorm Owner Registration] Uploaded permits/documents", [
-                    'dorm_id' => $dorm->id,
-                    'permit_paths' => $permitPaths
-                ]);
             }
 
             DB::commit();
-            Log::info("[Dorm Owner Registration] Registration successful", [
-                'dorm_id' => $dorm->id,
-                'status' => 'pending'
-            ]);
 
-            return redirect('/')->with('success', 'Registration completed! Awaiting approval.');
+            // ✅ Send confirmation email
+            Mail::to($dorm->owner->email)->send(new DormAcceptedMail($dorm));
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Registration completed!',
+                'redirect' => route('thank.you')
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("[Dorm Owner Registration] Registration failed", [
@@ -173,13 +147,11 @@ class OwnerRegistrationController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_payload' => $request->all()
             ]);
-        
-            // Return proper JSON for JS
+
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
+                'message' => 'Something went wrong. Please try again.'
             ], 500);
         }
-        
     }
 }

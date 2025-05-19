@@ -29,6 +29,10 @@ Route::get('/view-dormitories/{id}', [DormController::class, 'show'])->name('pub
 Route::get('/registration', [OwnerRegistrationController::class, 'show'])->name('register-dorm-owner');
 Route::post('/owner/register', [OwnerRegistrationController::class, 'store'])->name('owner.register');
 
+Route::get('/registration/thank-you', function () {
+    return view('thank_you');
+})->name('thank.you');
+
 // User Registration
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('auth.register.form');
 Route::post('/register', [AuthController::class, 'register'])->name('auth.register');

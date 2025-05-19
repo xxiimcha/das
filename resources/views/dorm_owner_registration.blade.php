@@ -11,7 +11,7 @@
     <div class="card shadow border-0">
         <div class="card-body">
             <!-- Form -->
-            <form method="POST" enctype="multipart/form-data" action="{{ route('owner.register') }}" id="registrationForm" onsubmit="return false;">
+            <form method="POST" enctype="multipart/form-data" action="{{ route('owner.register') }}" id="registrationForm">
                 @csrf
                 <!-- Hidden Inputs for Validation -->
                 <input type="hidden" name="dorm_id" value="{{ $dorm->id }}">
@@ -56,9 +56,9 @@
                     </div>
                 </div>
 
-                <input type="text" id="latitude" name="latitude">
-                <input type="text" id="longitude" name="longitude">
-                <input type="text" id="formatted_address" name="formatted_address">
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+                <input type="hidden" id="formatted_address" name="formatted_address">
 
                 <!-- Dormitory Details Section -->
                 <h3 class="text-primary">Dormitory Details</h3>
@@ -207,49 +207,71 @@
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 
 <script>
-     document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("registrationForm");
         const submitBtn = document.getElementById("submitBtn");
         const loader = document.getElementById("fullPageLoader");
+        const thankYouMessage = document.getElementById("thankYouMessage");
 
         form.addEventListener("submit", async function (e) {
-            e.preventDefault();
-            loader.classList.remove('d-none');
+    e.preventDefault();
 
-            const formData = new FormData(form);
+    // Prevent re-submission
+    if (form.classList.contains('submitted')) return;
 
-            try {
-                const response = await fetch(form.action, {
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-                    },
-                    body: formData
-                });
+    form.classList.add('submitted');
+    submitBtn.disabled = true;
+    loader.classList.remove('d-none');
 
-                if (response.redirected) {
-                    window.location.href = response.url;
-                    return;
-                }
+    const formData = new FormData(form);
 
-                const data = await response.json();
-
-                loader.classList.add('d-none');
-
-                if (data.status === 'error') {
-                    alert("Error: " + data.message);
-                } else {
-                    alert("Submission failed. Please try again.");
-                }
-
-            } catch (error) {
-                loader.classList.add('d-none');
-                alert("JS Error: " + error.message);
-                console.error("JS Fetch Error:", error);
-            }
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            },
+            body: formData
         });
 
+        if (response.redirected) {
+            window.location.href = response.url;
+            return;
+        }
+
+        const data = await response.json();
+        loader.classList.add('d-none');
+
+        if (data.status === 'success') {
+            window.location.href = data.redirect;
+        } else {
+            submitBtn.disabled = false;
+            form.classList.remove('submitted');
+            Swal.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: data.message || 'Something went wrong. Please try again.'
+            });
+        }
+
+    } catch (error) {
+        loader.classList.add('d-none');
+        submitBtn.disabled = false;
+        form.classList.remove('submitted');
+
+        if (error.name === 'SyntaxError') return;
+
+        console.error("JS Fetch Error:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'JavaScript Error',
+            text: error.message
+        });
+    }
+});
+
     });
+
 
     document.addEventListener("DOMContentLoaded", function () {
         var map = L.map('map').setView([14.5995, 120.9842], 12); // Default to Manila, adjust as needed
@@ -277,12 +299,44 @@
 
         // Click event to place a marker
         map.on('click', function (e) {
-            if (marker) {
-                map.removeLayer(marker);
-            }
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
 
-            marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-            updateLocation(e.latlng.lat, e.latlng.lng);
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.display_name;
+
+                    Swal.fire({
+                        title: 'Confirm Location',
+                        text: `Is this the correct address?\n\n${address}`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, confirm',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'btn btn-success me-2',
+                            cancelButton: 'btn btn-secondary'
+                        },
+                        buttonsStyling: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if (marker) {
+                                map.removeLayer(marker);
+                            }
+
+                            marker = L.marker([lat, lng]).addTo(map);
+
+                            document.getElementById('latitude').value = lat;
+                            document.getElementById('longitude').value = lng;
+                            document.getElementById('formatted_address').value = address;
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching address:", error);
+                    Swal.fire('Error', 'Unable to fetch address. Please try again.', 'error');
+                });
         });
     });
 </script>
