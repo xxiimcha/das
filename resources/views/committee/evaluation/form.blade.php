@@ -12,10 +12,21 @@
         <h3 class="card-title">Evaluate Dormitory</h3>
     </div>
     <div class="card-body">
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('evaluation.criteria.submit') }}" id="evaluationForm">
             @csrf
             <input type="hidden" name="schedule_id" value="{{ $schedule->id }}">
             <input type="hidden" name="batch_id" value="{{ $batchId }}">
+            <input type="hidden" name="final_remarks" id="finalRemarksInput">
 
             <div class="mb-3">
                 <label class="form-label"><strong>Evaluator Name:</strong></label>
@@ -123,15 +134,19 @@ function calculateTotalRating() {
     document.getElementById('totalRating').textContent = `${total.toFixed(0)} / ${expectedTotal}`;
 
     const remarksEl = document.getElementById('remarks');
+    const finalRemarksInput = document.getElementById('finalRemarksInput');
+
     if (hasInput) {
         remarksEl.classList.remove('d-none');
         const percentage = expectedTotal === 0 ? 0 : (total / expectedTotal) * 100;
         if (percentage >= 75) {
             remarksEl.textContent = 'Pass';
             remarksEl.className = 'badge fs-6 bg-success';
+            finalRemarksInput.value = 'accredited';
         } else {
             remarksEl.textContent = 'Failed';
             remarksEl.className = 'badge fs-6 bg-danger';
+            finalRemarksInput.value = 'failed';
         }
     } else {
         remarksEl.classList.add('d-none');

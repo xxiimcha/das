@@ -1,53 +1,38 @@
 <?php
-
 namespace App\Mail;
 
+use App\Models\Dormitory;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Storage;
 
 class DormitoryAccreditationResult extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    public $dorm;
+    public $pdfPath;
+
+    public function __construct(Dormitory $dorm, $pdfPath = null)
     {
-        //
+        $this->dorm = $dorm;
+        $this->pdfPath = $pdfPath;
     }
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Dormitory Accreditation Result',
-        );
-    }
+        $email = $this->subject('Dormitory Accreditation Result')
+                      ->markdown('emails.dormitory.result');
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            markdown: 'emails.dormitory.result',
-        );
-    }
+        if ($this->pdfPath) {
+            $email->attach(Storage::path("public/{$this->pdfPath}"), [
+                'as' => 'Certification.pdf',
+                'mime' => 'application/pdf',
+            ]);
+        }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
+        return $email;
     }
 }

@@ -35,18 +35,21 @@ class EvaluationCriteriaRatingController extends Controller
             );
         }
 
-        // Update accreditation schedule status
+        // Update accreditation schedule
         $schedule = AccreditationSchedule::findOrFail($validated['schedule_id']);
         $schedule->status = $validated['final_remarks'];
         $schedule->save();
 
-        // Notify owner
+        // Update related dormitory status
         $dorm = $schedule->dormitory;
+        $dorm->status = $validated['final_remarks'];
+        $dorm->save();
+
+        // Email logic
         $ownerEmail = $dorm->email;
         $status = $validated['final_remarks'];
 
         if ($status === 'accredited') {
-            // Generate certificate PDF
             $pdf = Pdf::loadView('pdf.certificate', [
                 'dorm' => $dorm,
                 'date' => now()->format('F d, Y'),
@@ -57,16 +60,12 @@ class EvaluationCriteriaRatingController extends Controller
             $pdfPath = 'certificates/' . $dorm->id . '_certificate.pdf';
             Storage::put('public/' . $pdfPath, $pdf->output());
 
-            // Send email with attachment
             Mail::to($ownerEmail)->send(new DormitoryAccreditationResult($dorm, $pdfPath));
         } else {
-            // Send email without attachment
             Mail::to($ownerEmail)->send(new DormitoryAccreditationResult($dorm));
         }
 
-        // Optional: Send SMS (you can integrate your SMS gateway here)
-        // e.g., SmsService::send($dorm->contact_number, "Your dormitory status: $status");
-
         return redirect()->route('evaluation.schedules')->with('success', 'Evaluation submitted and status updated.');
     }
+
 }

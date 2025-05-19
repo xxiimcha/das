@@ -1,12 +1,20 @@
-<x-mail::message>
-# Introduction
+@component('mail::message')
+# Dormitory Accreditation Result
 
-The body of your message.
+Dear {{ $dorm->owner->name ?? 'Dormitory Owner' }},
 
-<x-mail::button :url="''">
-Button Text
-</x-mail::button>
+Your dormitory **{{ $dorm->name }}** has completed its evaluation process.
 
-Thanks,<br>
-{{ config('app.name') }}
-</x-mail::message>
+@if ($pdfPath)
+We are pleased to inform you that your dormitory has been **accredited**.
+
+You may find your certification attached to this email.
+@else
+We regret to inform you that your dormitory did **not pass** the accreditation process. You may contact us for further clarification.
+@endif
+
+Thank you for participating in the Dormitory Accreditation Program.
+
+Regards,  
+**Dormitory Accreditation Committee**
+@endcomponent
