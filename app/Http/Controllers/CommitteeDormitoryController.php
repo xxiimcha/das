@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Mail\DormitoryInvitation;
 use App\Mail\EvaluationScheduled;
+use Illuminate\Support\Facades\Http;
 
 class CommitteeDormitoryController extends Controller
 {
@@ -136,6 +137,8 @@ class CommitteeDormitoryController extends Controller
             ->with('success', 'Dormitory marked for accreditation and owner notified.');
     }
 
+
+
     public function sendInvitation(Request $request)
     {
         $request->validate([
@@ -144,17 +147,29 @@ class CommitteeDormitoryController extends Controller
 
         $dormitory = Dormitory::with('owner')->findOrFail($request->dormitory_id);
 
-        // Generate a one-time token and store it
+        // Generate one-time token and save
         $token = Str::uuid();
         $dormitory->invitation_token = $token;
         $dormitory->save();
 
-        // Generate registration link
+        // Registration link
         $registrationUrl = url("/registration?token={$token}&dorm_id={$dormitory->id}");
 
-        // Send email
+        // Send Email
         Mail::to($dormitory->email)->send(new DormitoryInvitation($dormitory, $registrationUrl));
 
-        return redirect()->back()->with('success', 'Invitation email sent successfully.');
+        // Send SMS via Semaphore
+        if ($dormitory->contact_number) {
+            $message = "Hi {$dormitory->owner->name}, here is your DASCONNECT dorm registration link: {$registrationUrl}";
+
+            Http::asForm()->post('https://api.semaphore.co/api/v4/messages', [
+                'apikey'     => env('SEMAPHORE_API_KEY'),
+                'number'     => $dormitory->contact_number,
+                'message'    => $message,
+                'sendername' => 'DASCONNECT', // Make sure DASCONNECT is approved
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Invitation email and SMS sent successfully.');
     }
 }
