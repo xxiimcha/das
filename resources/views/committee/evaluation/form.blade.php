@@ -139,7 +139,7 @@ function calculateTotalRating() {
     if (hasInput) {
         remarksEl.classList.remove('d-none');
         const percentage = expectedTotal === 0 ? 0 : (total / expectedTotal) * 100;
-        if (percentage >= 75) {
+        if (percentage >= 50) {
             remarksEl.textContent = 'Pass';
             remarksEl.className = 'badge fs-6 bg-success';
             finalRemarksInput.value = 'accredited';
