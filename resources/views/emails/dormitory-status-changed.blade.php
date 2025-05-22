@@ -65,22 +65,38 @@
         </div>
         <div class="email-body">
             <p>Dear {{ $dormitory->owner->name }},</p>
-            <p>We are writing to inform you that the status of your dormitory <span class="highlight">{{ $dormitory->name }}</span> has been updated to <span class="highlight">{{ ucfirst($status) }}</span>.</p>
 
-            @if ($status === 'approved')
-                <p>The evaluation/accreditation date has been scheduled for <span class="highlight">{{ $additionalInfo }}</span>.</p>
-                <p>Kindly ensure that all necessary preparations are made before this date.</p>
-            @elseif ($status === 'declined')
-                <p>The reason for the decline is as follows:</p>
-                <blockquote style="border-left: 4px solid #dc3545; padding-left: 10px; margin-left: 0; color: #555555;">
-                    {{ $additionalInfo }}
-                </blockquote>
-                <p>If you have any questions or need clarification, please contact us.</p>
-            @endif
+            <p>I hope this message finds you well.</p>
 
-            <p>Thank you for your cooperation.</p>
-            <p>Best regards,</p>
-            <p><strong>The Committee Team</strong></p>
+            <p>At the Office of Student Affairs in the University of Nueva Caceres, we are pleased to invite you to register your dormitory, <strong>{{ $dormitory->name }}</strong>, as part of the UNC Dormitory Accreditation Program. Our mission is to support students, encourage innovation, and uphold the highest standard of academic integrity.</p>
+
+            <h4>Program Overview</h4>
+            <p>Your dormitory’s accreditation will consist of three simple steps:</p>
+
+            <ol>
+                <li><strong>Register Your Dormitory</strong><br>
+                • Complete the online registration form with basic details about your facility.</li>
+
+                <li><strong>On-Site Inspection</strong><br>
+                • A member of our Accreditation Committee will visit to verify that your dorm meets our safety, sanitation, and facility standards.</li>
+
+                <li><strong>Final Evaluation &amp; Approval</strong><br>
+                • We’ll review inspection findings and formally issue your accreditation certificate once all criteria are met.</li>
+            </ol>
+
+            <p>Upon successful completion, your dormitory accreditation will be valid for one year before re-accreditation of the dormitory.</p>
+
+            <p>To begin, kindly proceed to the registration link below:</p>
+
+            <p>
+                <a href="{{ $registrationUrl }}">{{ $registrationUrl }}</a>
+            </p>
+
+            <p><strong>Note:</strong> This link is one-time use and will expire after submission.</p>
+
+            <p>Thank you,<br>
+            UNC Dormitory Accreditation Committee</p>
+
 
             <a href="{{ url('/') }}" class="button">Visit Our Platform</a>
         </div>

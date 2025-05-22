@@ -13,6 +13,16 @@ You may find your certification attached to this email.
 We regret to inform you that your dormitory did **not pass** the accreditation process. You may contact us for further clarification.
 @endif
 
+---
+
+### Account Credentials  
+You may now log in using the following account details:
+
+- **Email:** {{ $dorm->owner->email }}  
+- **Default Password:** password
+
+> Please make sure to change your password after logging in for the first time.
+
 Thank you for participating in the Dormitory Accreditation Program.
 
 Regards,  
