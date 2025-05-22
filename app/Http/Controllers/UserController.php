@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserAccountCredentials;
 
 class UserController extends Controller
 {
@@ -31,6 +33,7 @@ class UserController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -40,10 +43,9 @@ class UserController extends Controller
             'status' => 'required|string|in:active,inactive',
         ]);
 
-        $plaintextPassword = 'password123'; // Default password
+        $plaintextPassword = 'password123';
         $hashedPassword = Hash::make($plaintextPassword);
 
-        // Prepare the user data
         $userData = [
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
@@ -54,7 +56,6 @@ class UserController extends Controller
 
         Log::info('Final user data being inserted', $userData);
 
-        // Save the user and log the saved record
         $user = User::create($userData);
 
         Log::info('User record after saving', [
@@ -62,9 +63,11 @@ class UserController extends Controller
             'hashed_password_in_db' => $hashedPassword,
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User added successfully with default password!');
-    }
+        // ✅ Send email with credentials
+        Mail::to($user->email)->send(new UserAccountCredentials($user, $plaintextPassword));
 
+        return redirect()->route('users.index')->with('success', 'User added and credentials emailed successfully!');
+    }
 
     /**
      * Delete a user by ID.

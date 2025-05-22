@@ -21,7 +21,6 @@ You may now log in using the following account details:
 - **Email:** {{ $dorm->owner->email }}  
 - **Default Password:** password
 
-> Please make sure to change your password after logging in for the first time.
 
 Thank you for participating in the Dormitory Accreditation Program.
 
